@@ -77,6 +77,21 @@ compounds on top of that.
     $\pi/(6\sqrt{t})$, destroys the delicate phase coherence that the inverse
     QFT relies on, producing near-uniform random output.
 
+<figure markdown="span">
+  ![QPE fidelity versus precision qubits comparing standard and TSVF on IBM Fez](../assets/images/experiments/qpe-fidelity-vs-precision.png){ width="700" loading="lazy" }
+  <figcaption>Phase fidelity versus precision qubits (t) on IBM Fez. Standard QPE (blue) maintains high fidelity across all precision levels, correctly identifying φ ≈ 1/3. TSVF-QPE (orange) collapses to near-zero fidelity — the chaotic perturbation destroys the phase coherence that the inverse QFT requires.</figcaption>
+</figure>
+
+<figure markdown="span">
+  ![QPE phase error versus precision comparing standard and TSVF variants](../assets/images/experiments/qpe-phase-error-vs-precision.png){ width="700" loading="lazy" }
+  <figcaption>Phase estimation error versus precision qubits. Standard QPE error decreases with precision (as expected for an irrational eigenphase), while TSVF-QPE error remains high — consistent with random output from destroyed phase structure.</figcaption>
+</figure>
+
+<figure markdown="span">
+  ![QPE histogram entropy comparison showing TSVF produces near-uniform output](../assets/images/experiments/qpe-entropy-vs-precision.png){ width="600" loading="lazy" }
+  <figcaption>Histogram entropy versus precision. Higher entropy indicates a more uniform (random) distribution. TSVF-QPE entropy approaches the maximum, confirming the inverse QFT produces diffuse rather than peaked output when phase coherence is disrupted.</figcaption>
+</figure>
+
 ## Why TSVF Fails for QPE
 
 QPE encodes its answer in the **phase coherence** of the precision register
@@ -119,13 +134,45 @@ measurement.
 
 ```python
 from qgate.adapters.qpe_adapter import QPETSVFAdapter
+from qgate.config import GateConfig, ConditioningVariant
+from qgate.filter import TrajectoryFilter
 
+# Initialize the QPE TSVF adapter
 adapter = QPETSVFAdapter(
-    eigenphase=1/3,
-    n_precision_qubits=7,
+    backend=backend,          # AerSimulator() or IBM Runtime backend
+    algorithm_mode="standard",  # Use "standard" — TSVF is NOT recommended for QPE
+    eigenphase=1 / 3,
+    seed=42,
 )
 
-# Build both standard and TSVF circuits
-std_circuit = adapter.build_standard_circuit()
-tsvf_circuit = adapter.build_tsvf_circuit()
+# Build and run at t=7 precision qubits
+circuit = adapter.build_circuit(n_precision=7, n_cycles=1)
+raw_results = adapter.run(circuit, shots=8192)
+
+# Parse results
+outcomes = adapter.parse_results(raw_results, n_subsystems=8, n_cycles=1)
+
+# Extract best phase estimate
+best_bs, best_phase, best_count = adapter.extract_best_phase(
+    raw_results, n_precision=7, postselect=False,
+)
+correct_bits = adapter.get_correct_phase_bits(7)
+print(f"Best phase: {best_phase:.6f} (exact: {1/3:.6f})")
+print(f"Best bitstring: {best_bs} (correct: {correct_bits})")
 ```
+
+!!! warning "TSVF is not recommended for QPE"
+    Use `algorithm_mode="standard"` for QPE. The TSVF perturbation destroys
+    phase coherence, which is fundamental to QPE's operation. This is an
+    intrinsic limitation, not an implementation issue. See
+    [Why TSVF Works for Some Algorithms](index.md#why-tsvf-works-for-some-algorithms-but-not-others)
+    for the theoretical explanation.
+
+---
+
+## Related Experiments
+
+- [Grover TSVF on IBM Fez](grover.md) — 7.3× improvement for amplitude-encoded search
+- [QAOA TSVF on IBM Torino](qaoa.md) — 1.88× improvement for amplitude-encoded optimization
+- [VQE TSVF on IBM Fez](vqe.md) — barren plateau avoidance for amplitude-encoded eigensolving
+- [All Experiments Overview](index.md) — amplitude vs phase encoding comparison

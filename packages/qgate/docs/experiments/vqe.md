@@ -61,12 +61,32 @@ that plagues variational quantum eigensolvers on real hardware.
     low-energy execution paths even when the average trajectory has lost
     gradient information.
 
+<figure markdown="span">
+  ![VQE energy versus ansatz layers comparing standard and TSVF on IBM Fez showing barren plateau at L=3](../assets/images/experiments/vqe-energy-vs-layers.png){ width="700" loading="lazy" }
+  <figcaption>Measured energy versus ansatz layers (L) on IBM Fez. Standard VQE (blue) hits a barren plateau at L=3 where energy jumps by 1.2 units. TSVF-VQE (orange) maintains smooth descent — filtering for low-energy trajectories even when gradient signal vanishes.</figcaption>
+</figure>
+
+<figure markdown="span">
+  ![VQE energy error gap versus layers showing TSVF's largest advantage at the barren plateau onset](../assets/images/experiments/vqe-energy-error-vs-layers.png){ width="700" loading="lazy" }
+  <figcaption>Energy error (gap to exact ground state) versus ansatz depth. The largest TSVF advantage (Δ = 1.107) occurs at L=3 — exactly where standard VQE loses gradient signal, confirming TSVF is most beneficial where standard methods fail.</figcaption>
+</figure>
+
 ## Analysis
 
 - **Barren plateau onset** at L=3: Standard VQE energy degrades by 1.2 units
 - **TSVF smooth descent**: Energy gap Δ of **1.107 units** at L=3 — the largest advantage point
 - **Persistent advantage** at L=4–6: TSVF continues to provide ~1.0 unit improvement
 - **Confirms**: TSVF is most beneficial exactly where standard VQE fails
+
+<figure markdown="span">
+  ![VQE TSVF acceptance rate across ansatz layers on IBM Fez](../assets/images/experiments/vqe-acceptance-rate.png){ width="600" loading="lazy" }
+  <figcaption>Post-selection acceptance rate across VQE ansatz layers. The energy probe ancilla maintains consistent filtering even as the ansatz depth increases.</figcaption>
+</figure>
+
+<figure markdown="span">
+  ![Galton adaptive threshold evolution during VQE TSVF experiment on IBM Fez](../assets/images/experiments/vqe-galton-threshold.png){ width="600" loading="lazy" }
+  <figcaption>Galton adaptive threshold automatically adjusting to the energy score distribution at each ansatz depth. See <a href="../concepts/dynamic-thresholding/">Dynamic Thresholding</a> for the Galton board mechanism.</figcaption>
+</figure>
 
 ## Reproduction
 
@@ -91,15 +111,40 @@ that plagues variational quantum eigensolvers on real hardware.
 
 ```python
 from qgate.adapters.vqe_adapter import VQETSVFAdapter
+from qgate.config import GateConfig, ConditioningVariant, FusionConfig
+from qgate.filter import TrajectoryFilter
 
+# Initialize the VQE TSVF adapter for TFIM Hamiltonian
 adapter = VQETSVFAdapter(
+    backend=backend,          # AerSimulator() or IBM Runtime backend
+    algorithm_mode="tsvf",    # "standard" or "tsvf"
     n_qubits=4,
-    n_layers=3,
-    hamiltonian_type="tfim",
-    field_strength=1.0,
+    j_coupling=1.0,
+    h_field=1.0,
+    seed=42,
 )
 
-# Build both standard and TSVF circuits
-std_circuit = adapter.build_standard_circuit()
-tsvf_circuit = adapter.build_tsvf_circuit()
+# Build and run at L=3 ansatz layers
+circuit = adapter.build_circuit(n_qubits=4, n_cycles=3)
+raw_results = adapter.run(circuit, shots=4000)
+
+# Parse into ParityOutcome objects
+outcomes = adapter.parse_results(raw_results, n_subsystems=4, n_cycles=3)
+
+# Extract energy metrics
+energy, energy_ratio, n_accepted = adapter.extract_energy(
+    raw_results, postselect=True,
+)
+exact_ground = adapter.exact_ground_energy()
+print(f"TSVF energy: {energy:.3f} (exact: {exact_ground:.3f})")
+print(f"Energy ratio: {energy_ratio:.4f} ({n_accepted} accepted shots)")
 ```
+
+---
+
+## Related Experiments
+
+- [Grover TSVF on IBM Fez](grover.md) — 7.3× search improvement with trajectory filtering
+- [QAOA TSVF on IBM Torino](qaoa.md) — 1.88× MaxCut improvement for shallow circuits
+- [QPE TSVF on IBM Fez](qpe.md) — negative result: phase-coherence incompatibility
+- [All Experiments Overview](index.md) — methodology and consolidated results table

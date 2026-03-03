@@ -55,11 +55,31 @@ Grover's success probability collapses on real NISQ devices.
     amplitude pattern, and TSVF post-selection filters for trajectories where
     the marked-state amplitude survived — yielding dramatic improvement.
 
+<figure markdown="span">
+  ![TSVF vs standard Grover success probability across iterations on IBM Fez showing 7.3x improvement at iteration 4](../assets/images/experiments/grover-prob-vs-iterations.png){ width="700" loading="lazy" }
+  <figcaption>Success probability (P<sub>acc</sub>) versus Grover iteration count on IBM Fez. Standard Grover (blue) collapses after iteration 2 due to hardware noise accumulation, while TSVF-Grover (orange) maintains high success probability through post-selection — peaking at 7.3× advantage at iteration 4.</figcaption>
+</figure>
+
+<figure markdown="span">
+  ![Grover circuit depth versus fidelity comparison between standard and TSVF variants](../assets/images/experiments/grover-depth-vs-fidelity.png){ width="700" loading="lazy" }
+  <figcaption>Transpiled circuit depth versus measured fidelity. As depth increases, standard Grover's fidelity degrades exponentially, while TSVF post-selection rescues high-fidelity trajectories even at depth 946.</figcaption>
+</figure>
+
 ## Analysis
 
 - **Crossover point** at iteration 3: TSVF begins outperforming standard Grover
 - **Peak advantage** at iterations 4–5: Standard success drops below 10% while TSVF maintains 40–60%
 - **Acceptance rate** stays ~25–30%, confirming the probe ancilla selects a meaningful subset
+
+<figure markdown="span">
+  ![Grover TSVF acceptance rate across iterations showing stable 25-30% post-selection](../assets/images/experiments/grover-acceptance-rate.png){ width="600" loading="lazy" }
+  <figcaption>Post-selection acceptance rate across Grover iterations. The stable 25–30% rate confirms the ancilla probe is selecting a meaningful subset of trajectories rather than randomly filtering.</figcaption>
+</figure>
+
+<figure markdown="span">
+  ![Galton adaptive threshold evolution during Grover TSVF experiment](../assets/images/experiments/grover-galton-threshold.png){ width="600" loading="lazy" }
+  <figcaption>Galton adaptive threshold evolution during the Grover experiment. The <a href="../concepts/dynamic-thresholding/">Galton board mechanism</a> automatically adjusts the acceptance threshold based on the observed score distribution.</figcaption>
+</figure>
 
 ## Reproduction
 
@@ -84,14 +104,42 @@ Grover's success probability collapses on real NISQ devices.
 
 ```python
 from qgate.adapters.grover_adapter import GroverTSVFAdapter
+from qgate.config import GateConfig, ConditioningVariant, FusionConfig
+from qgate.filter import TrajectoryFilter
 
+# Initialize the Grover TSVF adapter
 adapter = GroverTSVFAdapter(
-    n_qubits=5,
+    backend=backend,          # AerSimulator() or IBM Runtime backend
+    algorithm_mode="tsvf",    # "standard" or "tsvf"
     marked_state="10101",
-    n_iterations=4,
+    seed=42,
 )
 
-# Build both standard and TSVF circuits
-std_circuit = adapter.build_standard_circuit()
-tsvf_circuit = adapter.build_tsvf_circuit()
+# Build and run
+circuit = adapter.build_circuit(n_qubits=5, n_cycles=4)
+raw_results = adapter.run(circuit, shots=8192)
+
+# Parse results into ParityOutcome objects
+outcomes = adapter.parse_results(raw_results, n_subsystems=5, n_cycles=4)
+
+# Feed into qgate's trajectory filter pipeline
+config = GateConfig(
+    conditioning=ConditioningVariant.SCORE_FUSION,
+    fusion=FusionConfig(alpha=0.5),
+)
+filt = TrajectoryFilter(config)
+accepted, rejected, stats = filt.filter(outcomes)
+
+# Extract success probability
+prob, n_accepted = adapter.extract_target_probability(raw_results, postselect=True)
+print(f"TSVF success probability: {prob:.4f} ({n_accepted} accepted shots)")
 ```
+
+---
+
+## Related Experiments
+
+- [QAOA TSVF on IBM Torino](qaoa.md) — 1.88× MaxCut improvement, same post-selection mechanism
+- [VQE TSVF on IBM Fez](vqe.md) — barren plateau avoidance via trajectory filtering
+- [QPE TSVF on IBM Fez](qpe.md) — negative result: why phase-coherence algorithms don't benefit
+- [All Experiments Overview](index.md) — methodology and consolidated results table

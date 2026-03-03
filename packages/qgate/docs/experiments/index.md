@@ -53,6 +53,16 @@ the hardware noise and the perturbation.
 | [**VQE**](vqe.md) (L=3) | IBM Fez | Energy gap to ground | 2.398 | **1.291** | :material-fire: **1.86×** closer |
 | [**QPE**](qpe.md) (t=7) | IBM Fez | Phase fidelity | **0.1569** | 0.0076 | :material-close: N/A |
 
+<figure markdown="span">
+  ![IBM hardware probe heatmap showing ancilla signal strength across qubit configurations](../assets/images/experiments/ibm-probe-heatmap.png){ width="600" loading="lazy" }
+  <figcaption>Probe ancilla signal heatmap across qubit configurations on IBM Quantum hardware. Stronger signal (brighter regions) indicates higher-fidelity trajectory subsets selected by TSVF post-selection.</figcaption>
+</figure>
+
+<figure markdown="span">
+  ![Score fusion alpha parameter sweep showing optimal blending between low-frequency and high-frequency signals](../assets/images/experiments/ibm-fusion-vs-alpha.png){ width="600" loading="lazy" }
+  <figcaption>Score fusion parameter sweep: optimal alpha blending between low-frequency (LF) and high-frequency (HF) parity signals. The fusion mechanism adaptively weights signal channels for maximum discrimination.</figcaption>
+</figure>
+
 ---
 
 ## Why TSVF Works for Some Algorithms but Not Others
@@ -94,3 +104,18 @@ your IBM Quantum token:
 ```
 
 See each experiment page for specific commands.
+
+<figure markdown="span">
+  ![Acceptance rate vs circuit depth across IBM Quantum experiments showing stable post-selection rates](../assets/images/experiments/ibm-acceptance-vs-depth.png){ width="600" loading="lazy" }
+  <figcaption>Acceptance rate versus transpiled circuit depth across all IBM Quantum experiments. Post-selection rates remain stable (25–50%) even as circuit depth grows, confirming the probe ancilla selects a meaningful trajectory subset.</figcaption>
+</figure>
+
+---
+
+## Further Reading
+
+- [Architecture & Methodology](../architecture.md) — mathematical foundations of TSVF conditioning
+- [How It Works](../concepts/how-it-works.md) — conceptual overview of trajectory filtering
+- [Score Fusion](../concepts/fusion-scoring.md) — alpha-blended multi-channel scoring
+- [Dynamic Thresholding](../concepts/dynamic-thresholding.md) — Galton adaptive threshold mechanism
+- [API Reference](../api.md) — full Python API documentation

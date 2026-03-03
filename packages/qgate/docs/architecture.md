@@ -27,6 +27,11 @@ mid-circuit measurements to monitor subsystem fidelity and applies decision
 rules to accept or reject quantum computation outcomes — thereby suppressing
 errors without full quantum error correction.
 
+<figure markdown="span">
+  ![qgate conceptual schematic showing the full trajectory filtering pipeline from Bell-pair preparation through conditioning and decision](assets/images/architecture/conceptual-schematic.svg){ width="800" loading="lazy" }
+  <figcaption>Conceptual schematic of the qgate trajectory filtering pipeline. Bell-pair subsystems are prepared, scrambled under noise, and monitored via mid-circuit Z-parity measurements. The conditioning decision rule (global, hierarchical, or score fusion) accepts or rejects each shot based on subsystem fidelity.</figcaption>
+</figure>
+
 ---
 
 ## Core Concept

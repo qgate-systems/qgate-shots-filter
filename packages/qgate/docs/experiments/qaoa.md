@@ -55,11 +55,31 @@ hardware noise has the most severe impact on variational quality.
     ratio. At higher p, the variational ansatz has enough expressivity to
     partially self-correct, so the TSVF advantage narrows.
 
+<figure markdown="span">
+  ![QAOA approximation ratio vs layers comparing standard and TSVF on IBM Torino showing 1.88x improvement at p=1](../assets/images/experiments/qaoa-approx-ratio-vs-layers.png){ width="700" loading="lazy" }
+  <figcaption>Approximation ratio versus QAOA layers (p) on IBM Torino. At p=1 the TSVF variant (orange) nearly doubles the MaxCut quality compared to standard QAOA (blue). The advantage narrows at deeper circuits where the variational ansatz self-corrects.</figcaption>
+</figure>
+
+<figure markdown="span">
+  ![QAOA circuit depth versus approximation ratio on IBM Torino hardware](../assets/images/experiments/qaoa-depth-vs-approx-ratio.png){ width="700" loading="lazy" }
+  <figcaption>Transpiled circuit depth versus approximation ratio. TSVF provides the largest benefit at shallow depths where hardware noise has the most severe impact on a single QAOA layer.</figcaption>
+</figure>
+
 ## Analysis
 
 - **Strongest advantage** at p=1: TSVF rescues nearly 2× the approximation quality
 - **Diminishing returns** at p ≥ 2: deeper circuits self-correct, reducing TSVF's marginal benefit
 - **Consistent acceptance** at ~33–36%, showing stable post-selection regardless of depth
+
+<figure markdown="span">
+  ![QAOA TSVF acceptance rate across layers showing stable 33-36% post-selection](../assets/images/experiments/qaoa-acceptance-rate.png){ width="600" loading="lazy" }
+  <figcaption>Post-selection acceptance rate across QAOA layers. The stable 33–36% rate demonstrates consistent trajectory quality filtering regardless of circuit depth.</figcaption>
+</figure>
+
+<figure markdown="span">
+  ![Galton adaptive threshold evolution during QAOA TSVF experiment on IBM Torino](../assets/images/experiments/qaoa-galton-threshold.png){ width="600" loading="lazy" }
+  <figcaption>Galton adaptive threshold evolution during the QAOA experiment. The threshold dynamically adjusts to the score distribution at each layer depth. See <a href="../concepts/dynamic-thresholding/">Dynamic Thresholding</a> for details.</figcaption>
+</figure>
 
 ## Reproduction
 
@@ -84,14 +104,37 @@ hardware noise has the most severe impact on variational quality.
 
 ```python
 from qgate.adapters.qaoa_adapter import QAOATSVFAdapter
+from qgate.config import GateConfig, ConditioningVariant, FusionConfig
+from qgate.filter import TrajectoryFilter
 
+# Initialize the QAOA TSVF adapter for MaxCut
 adapter = QAOATSVFAdapter(
-    n_qubits=6,
+    backend=backend,          # AerSimulator() or IBM Runtime backend
+    algorithm_mode="tsvf",    # "standard" or "tsvf"
+    n_nodes=6,
     edges=[(0,1), (1,2), (2,3), (3,4), (4,5), (0,5)],
-    p_layers=1,
+    seed=42,
 )
 
-# Build both standard and TSVF circuits
-std_circuit = adapter.build_standard_circuit()
-tsvf_circuit = adapter.build_tsvf_circuit()
+# Build and run at p=1 (single QAOA layer)
+circuit = adapter.build_circuit(n_qubits=6, n_cycles=1)
+raw_results = adapter.run(circuit, shots=2000)
+
+# Parse into ParityOutcome objects for trajectory filtering
+outcomes = adapter.parse_results(raw_results, n_subsystems=6, n_cycles=1)
+
+# Extract MaxCut quality metrics
+cut_ratio, approx_ratio, n_accepted = adapter.extract_cut_quality(
+    raw_results, postselect=True,
+)
+print(f"TSVF approximation ratio: {approx_ratio:.4f} ({n_accepted} accepted)")
 ```
+
+---
+
+## Related Experiments
+
+- [Grover TSVF on IBM Fez](grover.md) — 7.3× improvement with the same post-selection mechanism
+- [VQE TSVF on IBM Fez](vqe.md) — barren plateau avoidance for variational eigensolvers
+- [QPE TSVF on IBM Fez](qpe.md) — negative result demonstrating TSVF's amplitude-encoding requirement
+- [All Experiments Overview](index.md) — methodology and consolidated results table
