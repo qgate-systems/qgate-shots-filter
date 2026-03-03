@@ -30,6 +30,7 @@ The adapter supports two algorithm variants via ``algorithm_mode``:
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 import math
@@ -42,7 +43,7 @@ from qgate.conditioning import ParityOutcome
 
 # Guard Qiskit imports for load-time tolerance.
 try:
-    from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, transpile
+    from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, transpile
     from qiskit.circuit.library import RYGate
 
     _HAS_QISKIT = True
@@ -63,7 +64,7 @@ def phase_to_binary_fraction(phi: float, n_bits: int) -> str:
 
     Example: φ = 0.375 with n_bits=3 → "011"  (0.011₂ = 3/8)
     """
-    val = round(phi * (2 ** n_bits)) % (2 ** n_bits)
+    val = round(phi * (2**n_bits)) % (2**n_bits)
     return format(val, f"0{n_bits}b")
 
 
@@ -74,7 +75,7 @@ def binary_fraction_to_phase(bitstring: str) -> float:
     """
     n = len(bitstring)
     val = int(bitstring, 2)
-    return val / (2 ** n)
+    return float(val / (2**n))
 
 
 def phase_error(measured_phase: float, true_phase: float) -> float:
@@ -145,7 +146,7 @@ def mean_phase_error(
 
 
 def _controlled_phase_rotation(
-    qc: "QuantumCircuit",
+    qc: QuantumCircuit,
     control_qubit: int,
     target_qubit: int,
     angle: float,
@@ -159,7 +160,7 @@ def _controlled_phase_rotation(
 
 
 def _inverse_qft(
-    qc: "QuantumCircuit",
+    qc: QuantumCircuit,
     qubits: list[int],
 ) -> None:
     """Apply inverse QFT on the given qubits (MSB-first convention).
@@ -178,7 +179,7 @@ def _inverse_qft(
 
 
 def _chaotic_qpe_ansatz(
-    qc: "QuantumCircuit",
+    qc: QuantumCircuit,
     qubits: list[int],
     iteration: int,
     rng: np.random.Generator,
@@ -225,7 +226,7 @@ def _chaotic_qpe_ansatz(
 
 
 def _add_phase_probe_ancilla(
-    qc: "QuantumCircuit",
+    qc: QuantumCircuit,
     precision_qubits: list[int],
     ancilla_qubit: int,
     ancilla_cbit: Any,
@@ -313,8 +314,7 @@ class QPETSVFAdapter(BaseAdapter):
     ) -> None:
         if not _HAS_QISKIT:  # pragma: no cover
             raise ImportError(
-                "QPETSVFAdapter requires Qiskit. "
-                "Install with: pip install qgate[qiskit]"
+                "QPETSVFAdapter requires Qiskit. Install with: pip install qgate[qiskit]"
             )
         self.backend = backend
         self.algorithm_mode = algorithm_mode
@@ -333,7 +333,7 @@ class QPETSVFAdapter(BaseAdapter):
         n_subsystems: int,
         n_cycles: int,
         **kwargs: Any,
-    ) -> "QuantumCircuit":
+    ) -> QuantumCircuit:
         """Build the QPE circuit.
 
         ``n_subsystems`` = number of precision qubits (t).
@@ -349,8 +349,7 @@ class QPETSVFAdapter(BaseAdapter):
             return self._build_tsvf(n_subsystems, seed_offset)
         else:
             raise ValueError(
-                f"Unknown algorithm_mode: {self.algorithm_mode!r}. "
-                f"Use 'standard' or 'tsvf'."
+                f"Unknown algorithm_mode: {self.algorithm_mode!r}. Use 'standard' or 'tsvf'."
             )
 
     def run(
@@ -367,10 +366,10 @@ class QPETSVFAdapter(BaseAdapter):
             raise RuntimeError("No backend configured for QPETSVFAdapter")
 
         try:
-            from qiskit_ibm_runtime import SamplerV2 as Sampler
             from qiskit.transpiler.preset_passmanagers import (
                 generate_preset_pass_manager,
             )
+            from qiskit_ibm_runtime import SamplerV2 as Sampler
 
             pm = generate_preset_pass_manager(
                 backend=self.backend,
@@ -425,7 +424,10 @@ class QPETSVFAdapter(BaseAdapter):
         outcomes: list[ParityOutcome] = []
         for bitstring, count in counts.items():
             row = self._bitstring_to_parity_row(
-                bitstring, n_subsystems, n_cycles, correct_bits,
+                bitstring,
+                n_subsystems,
+                n_cycles,
+                correct_bits,
             )
             for _ in range(count):
                 outcomes.append(
@@ -441,14 +443,14 @@ class QPETSVFAdapter(BaseAdapter):
     # Public helpers (beyond BaseAdapter)
     # ------------------------------------------------------------------
 
-    def get_transpiled_depth(self, circuit: "QuantumCircuit") -> int:
+    def get_transpiled_depth(self, circuit: QuantumCircuit) -> int:
         """Return the depth of the transpiled circuit."""
         transpiled = transpile(
             circuit,
             backend=self.backend,
             optimization_level=self.optimization_level,
         )
-        return transpiled.depth()
+        return int(transpiled.depth())
 
     def get_correct_phase_bits(self, n_precision: int) -> str:
         """Return the ideal binary-fraction bitstring for the eigenphase."""
@@ -475,12 +477,10 @@ class QPETSVFAdapter(BaseAdapter):
         correct_bits = phase_to_binary_fraction(self.eigenphase, n_precision)
 
         if postselect and self.algorithm_mode == "tsvf":
-            phase_counts, total_original, accepted_total = (
-                self._postselect_phase_counts(counts, n_precision)
+            phase_counts, total_original, accepted_total = self._postselect_phase_counts(
+                counts, n_precision
             )
-            acceptance_rate = (
-                accepted_total / total_original if total_original > 0 else 0.0
-            )
+            acceptance_rate = accepted_total / total_original if total_original > 0 else 0.0
         else:
             phase_counts = self._extract_phase_counts(counts, n_precision)
             accepted_total = sum(phase_counts.values())
@@ -488,7 +488,9 @@ class QPETSVFAdapter(BaseAdapter):
 
         fid = phase_fidelity(phase_counts, correct_bits)
         mean_err = mean_phase_error(
-            phase_counts, self.eigenphase, n_precision,
+            phase_counts,
+            self.eigenphase,
+            n_precision,
         )
         ent = histogram_entropy(phase_counts)
 
@@ -523,7 +525,8 @@ class QPETSVFAdapter(BaseAdapter):
 
         if postselect and self.algorithm_mode == "tsvf":
             phase_counts, _, _ = self._postselect_phase_counts(
-                counts, n_precision,
+                counts,
+                n_precision,
             )
         else:
             phase_counts = self._extract_phase_counts(counts, n_precision)
@@ -540,7 +543,7 @@ class QPETSVFAdapter(BaseAdapter):
     # Private circuit builders
     # ------------------------------------------------------------------
 
-    def _build_standard(self, n_precision: int) -> "QuantumCircuit":
+    def _build_standard(self, n_precision: int) -> QuantumCircuit:
         """Standard QPE: Hadamards + controlled-U^{2^k} + inverse QFT."""
         # Registers: t precision qubits + 1 eigenstate qubit
         prec_r = QuantumRegister(n_precision, "prec")
@@ -561,9 +564,12 @@ class QPETSVFAdapter(BaseAdapter):
         # Controlled-U^{2^k} gates
         # U = diag(1, e^{2πiφ}) → controlled-U^{2^k} is CP(2π·φ·2^k)
         for k in range(n_precision):
-            angle = 2 * math.pi * self.eigenphase * (2 ** k)
+            angle = 2 * math.pi * self.eigenphase * (2**k)
             _controlled_phase_rotation(
-                qc, prec_qubits[k], eig_qubit, angle,
+                qc,
+                prec_qubits[k],
+                eig_qubit,
+                angle,
             )
 
         # Inverse QFT on precision register
@@ -576,8 +582,10 @@ class QPETSVFAdapter(BaseAdapter):
         return qc
 
     def _build_tsvf(
-        self, n_precision: int, seed_offset: int = 0,
-    ) -> "QuantumCircuit":
+        self,
+        n_precision: int,
+        seed_offset: int = 0,
+    ) -> QuantumCircuit:
         """TSVF QPE: standard QPE + chaotic ansatz + phase probe ancilla.
 
         The chaotic ansatz is applied BEFORE the inverse QFT, perturbing
@@ -607,16 +615,22 @@ class QPETSVFAdapter(BaseAdapter):
 
         # Controlled-U^{2^k} gates (same as standard)
         for k in range(n_precision):
-            angle = 2 * math.pi * self.eigenphase * (2 ** k)
+            angle = 2 * math.pi * self.eigenphase * (2**k)
             _controlled_phase_rotation(
-                qc, prec_qubits[k], eig_qubit, angle,
+                qc,
+                prec_qubits[k],
+                eig_qubit,
+                angle,
             )
 
         qc.barrier()
 
         # ── TSVF mild perturbation on precision register ──
         _chaotic_qpe_ansatz(
-            qc, prec_qubits, iteration=0, rng=rng,
+            qc,
+            prec_qubits,
+            iteration=0,
+            rng=rng,
             n_precision=n_precision,
         )
         qc.barrier()
@@ -629,7 +643,10 @@ class QPETSVFAdapter(BaseAdapter):
         correct_bits = phase_to_binary_fraction(self.eigenphase, n_precision)
         angle = self.weak_angle_base + self.weak_angle_ramp * min(n_precision, 6)
         _add_phase_probe_ancilla(
-            qc, prec_qubits, anc_qubit, cr_anc[0],
+            qc,
+            prec_qubits,
+            anc_qubit,
+            cr_anc[0],
             correct_phase_bits=correct_bits,
             weak_angle=angle,
         )
@@ -670,10 +687,7 @@ class QPETSVFAdapter(BaseAdapter):
         if len(creg_names) <= 1:
             name = creg_names[0] if creg_names else "c_phase"
             try:
-                return {
-                    str(k): int(v)
-                    for k, v in pub.data[name].get_counts().items()
-                }
+                return {str(k): int(v) for k, v in pub.data[name].get_counts().items()}
             except Exception:
                 return {}
 
@@ -694,10 +708,7 @@ class QPETSVFAdapter(BaseAdapter):
         except Exception:
             name = creg_names[0]
             try:
-                return {
-                    str(k): int(v)
-                    for k, v in pub.data[name].get_counts().items()
-                }
+                return {str(k): int(v) for k, v in pub.data[name].get_counts().items()}
             except Exception:
                 return {}
 
@@ -710,7 +721,9 @@ class QPETSVFAdapter(BaseAdapter):
         return key[-n_precision:]
 
     def _split_ancilla_phase(
-        self, bitstring: str, n_precision: int,
+        self,
+        bitstring: str,
+        n_precision: int,
     ) -> tuple[str, str]:
         """Split bitstring into (ancilla_bit, phase_bits).
 
@@ -727,7 +740,9 @@ class QPETSVFAdapter(BaseAdapter):
         return key[0], key[1:]
 
     def _extract_phase_counts(
-        self, counts: dict[str, int], n_precision: int,
+        self,
+        counts: dict[str, int],
+        n_precision: int,
     ) -> dict[str, int]:
         """Extract phase-register-only counts from full bitstrings."""
         phase_counts: dict[str, int] = {}
@@ -756,9 +771,7 @@ class QPETSVFAdapter(BaseAdapter):
             anc_bit, phase_bits = self._split_ancilla_phase(key, n_precision)
             if anc_bit == "1":
                 accepted_total += val
-                phase_counts[phase_bits] = (
-                    phase_counts.get(phase_bits, 0) + val
-                )
+                phase_counts[phase_bits] = phase_counts.get(phase_bits, 0) + val
 
         return phase_counts, total_original, accepted_total
 
@@ -785,21 +798,27 @@ class QPETSVFAdapter(BaseAdapter):
 
         if self.algorithm_mode == "tsvf":
             anc_bit, phase_bits = self._split_ancilla_phase(
-                bitstring, n_subsystems,
+                bitstring,
+                n_subsystems,
             )
             if anc_bit == "1":
                 qubit_match = self._compute_phase_match(
-                    phase_bits, n_subsystems, correct_bits,
+                    phase_bits,
+                    n_subsystems,
+                    correct_bits,
                 )
                 matrix = np.tile(qubit_match, (effective_cycles, 1))
             else:
                 matrix = np.ones(
-                    (effective_cycles, n_subsystems), dtype=np.int8,
+                    (effective_cycles, n_subsystems),
+                    dtype=np.int8,
                 )
         else:
             phase_bits = self._extract_phase_bits(bitstring, n_subsystems)
             qubit_match = self._compute_phase_match(
-                phase_bits, n_subsystems, correct_bits,
+                phase_bits,
+                n_subsystems,
+                correct_bits,
             )
             matrix = np.tile(qubit_match, (effective_cycles, 1))
 

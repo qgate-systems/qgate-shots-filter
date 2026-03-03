@@ -1,4 +1,5 @@
 """Tests for qgate.run_logging.compute_run_id — deterministic run IDs."""
+
 from __future__ import annotations
 
 import json

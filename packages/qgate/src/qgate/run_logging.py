@@ -6,6 +6,7 @@ disk for reproducibility and analysis.
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 import datetime
@@ -32,9 +33,11 @@ def _get_pandas():
         ) from None
     return pd
 
+
 # ---------------------------------------------------------------------------
 # Run-ID computation (deterministic SHA-256 digest)
 # ---------------------------------------------------------------------------
+
 
 def compute_run_id(
     config_json: str,
@@ -78,9 +81,11 @@ def _json_default(obj: Any) -> Any:
         return obj.tolist()
     return str(obj)
 
+
 # ---------------------------------------------------------------------------
 # Result dataclass
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class FilterResult:
@@ -130,6 +135,7 @@ class FilterResult:
 # Run logger
 # ---------------------------------------------------------------------------
 
+
 class RunLogger:
     """Append-only logger that writes :class:`FilterResult` records.
 
@@ -155,13 +161,16 @@ class RunLogger:
         else:
             suffix = self.path.suffix.lower()
             mapping: dict[str, Literal["jsonl", "csv", "parquet"]] = {
-                ".jsonl": "jsonl", ".csv": "csv", ".parquet": "parquet",
+                ".jsonl": "jsonl",
+                ".csv": "csv",
+                ".parquet": "parquet",
             }
             if suffix not in mapping:
                 logger.warning(
                     "Unknown file extension %r for %s — defaulting to JSONL format. "
                     "Supported extensions: .jsonl, .csv, .parquet",
-                    suffix, self.path,
+                    suffix,
+                    self.path,
                 )
             self._fmt = mapping.get(suffix, "jsonl")
         self._records: list[dict[str, Any]] = []

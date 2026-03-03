@@ -27,6 +27,7 @@ The adapter supports two algorithm variants via ``algorithm_mode``:
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 import math
@@ -39,7 +40,7 @@ from qgate.conditioning import ParityOutcome
 
 # Guard Qiskit imports for load-time tolerance.
 try:
-    from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, transpile
+    from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, transpile
     from qiskit.circuit.library import RYGate
 
     _HAS_QISKIT = True
@@ -103,9 +104,8 @@ def maxcut_value(bitstring: str, edges: list[tuple[int, int]]) -> int:
     """Compute the MaxCut value for a bitstring partition."""
     cut = 0
     for i, j in edges:
-        if i < len(bitstring) and j < len(bitstring):
-            if bitstring[i] != bitstring[j]:
-                cut += 1
+        if i < len(bitstring) and j < len(bitstring) and bitstring[i] != bitstring[j]:
+            cut += 1
     return cut
 
 
@@ -113,7 +113,7 @@ def best_maxcut(n_nodes: int, edges: list[tuple[int, int]]) -> tuple[str, int]:
     """Brute-force the best MaxCut solution (only for small graphs)."""
     best_bs = "0" * n_nodes
     best_val = 0
-    for x in range(2 ** n_nodes):
+    for x in range(2**n_nodes):
         bs = format(x, f"0{n_nodes}b")
         val = maxcut_value(bs, edges)
         if val > best_val:
@@ -128,7 +128,7 @@ def best_maxcut(n_nodes: int, edges: list[tuple[int, int]]) -> tuple[str, int]:
 
 
 def _qaoa_cost_layer(
-    qc: "QuantumCircuit",
+    qc: QuantumCircuit,
     qubits: list[int],
     edges: list[tuple[int, int]],
     gamma: float,
@@ -145,7 +145,7 @@ def _qaoa_cost_layer(
 
 
 def _qaoa_mixer_layer(
-    qc: "QuantumCircuit",
+    qc: QuantumCircuit,
     qubits: list[int],
     beta: float,
 ) -> None:
@@ -155,7 +155,7 @@ def _qaoa_mixer_layer(
 
 
 def _chaotic_qaoa_ansatz(
-    qc: "QuantumCircuit",
+    qc: QuantumCircuit,
     qubits: list[int],
     layer: int,
     rng: np.random.Generator,
@@ -183,7 +183,7 @@ def _chaotic_qaoa_ansatz(
 
 
 def _add_cost_probe_ancilla(
-    qc: "QuantumCircuit",
+    qc: QuantumCircuit,
     qubits: list[int],
     edges: list[tuple[int, int]],
     ancilla_qubit: int,
@@ -273,8 +273,7 @@ class QAOATSVFAdapter(BaseAdapter):
     ) -> None:
         if not _HAS_QISKIT:  # pragma: no cover
             raise ImportError(
-                "QAOATSVFAdapter requires Qiskit. "
-                "Install with: pip install qgate[qiskit]"
+                "QAOATSVFAdapter requires Qiskit. Install with: pip install qgate[qiskit]"
             )
         self.backend = backend
         self.algorithm_mode = algorithm_mode
@@ -298,8 +297,9 @@ class QAOATSVFAdapter(BaseAdapter):
         """Resolve gamma/beta arrays for n_layers."""
         if self._gammas_raw is None:
             # Heuristic: linearly spaced from π/8 to π/4
-            gammas = [math.pi / 8 + (math.pi / 8) * l / max(n_layers - 1, 1)
-                      for l in range(n_layers)]
+            gammas = [
+                math.pi / 8 + (math.pi / 8) * idx / max(n_layers - 1, 1) for idx in range(n_layers)
+            ]
         elif isinstance(self._gammas_raw, (int, float)):
             gammas = [float(self._gammas_raw)] * n_layers
         else:
@@ -309,8 +309,9 @@ class QAOATSVFAdapter(BaseAdapter):
 
         if self._betas_raw is None:
             # Heuristic: linearly spaced from π/4 to π/8
-            betas = [math.pi / 4 - (math.pi / 8) * l / max(n_layers - 1, 1)
-                     for l in range(n_layers)]
+            betas = [
+                math.pi / 4 - (math.pi / 8) * idx / max(n_layers - 1, 1) for idx in range(n_layers)
+            ]
         elif isinstance(self._betas_raw, (int, float)):
             betas = [float(self._betas_raw)] * n_layers
         else:
@@ -329,7 +330,7 @@ class QAOATSVFAdapter(BaseAdapter):
         n_subsystems: int,
         n_cycles: int,
         **kwargs: Any,
-    ) -> "QuantumCircuit":
+    ) -> QuantumCircuit:
         """Build the QAOA circuit.
 
         ``n_subsystems`` = number of graph nodes (must match ``n_nodes``).
@@ -338,10 +339,7 @@ class QAOATSVFAdapter(BaseAdapter):
         Returns a :class:`QuantumCircuit`.
         """
         if n_subsystems != self.n_nodes:
-            raise ValueError(
-                f"n_subsystems ({n_subsystems}) must match n_nodes "
-                f"({self.n_nodes})"
-            )
+            raise ValueError(f"n_subsystems ({n_subsystems}) must match n_nodes ({self.n_nodes})")
         if self.algorithm_mode == "standard":
             return self._build_standard(n_subsystems, n_cycles)
         elif self.algorithm_mode == "tsvf":
@@ -349,8 +347,7 @@ class QAOATSVFAdapter(BaseAdapter):
             return self._build_tsvf(n_subsystems, n_cycles, seed_offset)
         else:
             raise ValueError(
-                f"Unknown algorithm_mode: {self.algorithm_mode!r}. "
-                f"Use 'standard' or 'tsvf'."
+                f"Unknown algorithm_mode: {self.algorithm_mode!r}. Use 'standard' or 'tsvf'."
             )
 
     def run(
@@ -367,10 +364,10 @@ class QAOATSVFAdapter(BaseAdapter):
             raise RuntimeError("No backend configured for QAOATSVFAdapter")
 
         try:
-            from qiskit_ibm_runtime import SamplerV2 as Sampler
             from qiskit.transpiler.preset_passmanagers import (
                 generate_preset_pass_manager,
             )
+            from qiskit_ibm_runtime import SamplerV2 as Sampler
 
             pm = generate_preset_pass_manager(
                 backend=self.backend,
@@ -436,14 +433,14 @@ class QAOATSVFAdapter(BaseAdapter):
     # Public helpers (beyond BaseAdapter)
     # ------------------------------------------------------------------
 
-    def get_transpiled_depth(self, circuit: "QuantumCircuit") -> int:
+    def get_transpiled_depth(self, circuit: QuantumCircuit) -> int:
         """Return the depth of the transpiled circuit."""
         transpiled = transpile(
             circuit,
             backend=self.backend,
             optimization_level=self.optimization_level,
         )
-        return transpiled.depth()
+        return int(transpiled.depth())
 
     def extract_cut_quality(
         self,
@@ -527,7 +524,7 @@ class QAOATSVFAdapter(BaseAdapter):
     # Private circuit builders
     # ------------------------------------------------------------------
 
-    def _build_standard(self, n_sub: int, n_layers: int) -> "QuantumCircuit":
+    def _build_standard(self, n_sub: int, n_layers: int) -> QuantumCircuit:
         """Standard QAOA: cost + mixer layers, no ancilla."""
         qr = QuantumRegister(n_sub, "q")
         cr = ClassicalRegister(n_sub, "c")
@@ -550,8 +547,11 @@ class QAOATSVFAdapter(BaseAdapter):
         return qc
 
     def _build_tsvf(
-        self, n_sub: int, n_layers: int, seed_offset: int = 0,
-    ) -> "QuantumCircuit":
+        self,
+        n_sub: int,
+        n_layers: int,
+        seed_offset: int = 0,
+    ) -> QuantumCircuit:
         """TSVF QAOA: cost + chaotic ansatz + ancilla probe per layer."""
         qr = QuantumRegister(n_sub, "q")
         anc_r = QuantumRegister(1, "anc")
@@ -585,7 +585,11 @@ class QAOATSVFAdapter(BaseAdapter):
             # Weak-measurement probe
             angle = self.weak_angle_base + self.weak_angle_ramp * min(layer, 4)
             _add_cost_probe_ancilla(
-                qc, qubits, self.edges, anc_qubit, cr_anc[0],
+                qc,
+                qubits,
+                self.edges,
+                anc_qubit,
+                cr_anc[0],
                 weak_angle=angle,
             )
             qc.barrier()
@@ -652,7 +656,7 @@ class QAOATSVFAdapter(BaseAdapter):
         key = bitstring.strip()
         if " " in key:
             return key.split()[-1]
-        return key[-self.n_nodes:]
+        return key[-self.n_nodes :]
 
     def _split_ancilla_search(self, bitstring: str) -> tuple[str, str]:
         """Split bitstring into (ancilla_bit, search_bits)."""
@@ -686,7 +690,8 @@ class QAOATSVFAdapter(BaseAdapter):
 
             if anc_bit == "1":
                 qubit_quality = self._compute_qubit_cut_quality(
-                    search_bits, n_subsystems,
+                    search_bits,
+                    n_subsystems,
                 )
                 matrix = np.tile(qubit_quality, (n_cycles, 1))
             else:
@@ -694,7 +699,8 @@ class QAOATSVFAdapter(BaseAdapter):
         else:
             search_bits = self._extract_search_bits(bitstring)
             qubit_quality = self._compute_qubit_cut_quality(
-                search_bits, n_subsystems,
+                search_bits,
+                n_subsystems,
             )
             matrix = np.tile(qubit_quality, (n_cycles, 1))
 
@@ -715,8 +721,11 @@ class QAOATSVFAdapter(BaseAdapter):
             # Check if this qubit participates in any cut edge
             for a, b in self.edges:
                 other = b if a == i else (a if b == i else None)
-                if other is not None and other < len(search_bits):
-                    if search_bits[i] != search_bits[other]:
-                        quality[i] = 0  # contributes to a cut
-                        break
+                if (
+                    other is not None
+                    and other < len(search_bits)
+                    and search_bits[i] != search_bits[other]
+                ):
+                    quality[i] = 0  # contributes to a cut
+                    break
         return quality

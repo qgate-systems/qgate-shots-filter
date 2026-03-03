@@ -1,4 +1,5 @@
 """Tests for qgate.filter — TrajectoryFilter."""
+
 from __future__ import annotations
 
 import pytest
@@ -14,6 +15,7 @@ from qgate.run_logging import FilterResult
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_filter(
     variant: str = "score_fusion",
@@ -36,6 +38,7 @@ def _make_filter(
 # ---------------------------------------------------------------------------
 # TrajectoryFilter.run
 # ---------------------------------------------------------------------------
+
 
 class TestTrajectoryFilterRun:
     def test_basic_run(self):
@@ -80,6 +83,7 @@ class TestTrajectoryFilterRun:
 # TrajectoryFilter.filter
 # ---------------------------------------------------------------------------
 
+
 class TestTrajectoryFilterFilter:
     def test_filter_prebuilt_outcomes(self):
         adapter = MockAdapter(error_rate=0.05, seed=42)
@@ -94,6 +98,7 @@ class TestTrajectoryFilterFilter:
 # Dynamic threshold integration
 # ---------------------------------------------------------------------------
 
+
 class TestDynamicThreshold:
     def test_dynamic_threshold_run(self):
         config = GateConfig(
@@ -102,7 +107,10 @@ class TestDynamicThreshold:
             shots=200,
             variant="score_fusion",
             dynamic_threshold=DynamicThresholdConfig(
-                enabled=True, baseline=0.65, z_factor=1.0, window_size=5,
+                enabled=True,
+                baseline=0.65,
+                z_factor=1.0,
+                window_size=5,
             ),
         )
         adapter = MockAdapter(error_rate=0.1, seed=42)
@@ -133,6 +141,7 @@ class TestDynamicThreshold:
 # ---------------------------------------------------------------------------
 # FilterResult
 # ---------------------------------------------------------------------------
+
 
 class TestFilterResult:
     def test_result_has_all_fields(self):

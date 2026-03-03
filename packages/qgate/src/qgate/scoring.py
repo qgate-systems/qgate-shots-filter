@@ -9,6 +9,7 @@ shots in a single array operation, avoiding per-shot Python loops.
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 import logging
@@ -24,6 +25,7 @@ logger = logging.getLogger("qgate.scoring")
 # ---------------------------------------------------------------------------
 # Single-shot fusion
 # ---------------------------------------------------------------------------
+
 
 def fuse_scores(
     lf_score: float,
@@ -51,6 +53,7 @@ def fuse_scores(
 # ---------------------------------------------------------------------------
 # Outcome-level scoring
 # ---------------------------------------------------------------------------
+
 
 def score_outcome(
     outcome: ParityOutcome,
@@ -86,6 +89,7 @@ def score_outcome(
 # Batch scoring
 # ---------------------------------------------------------------------------
 
+
 def score_batch(
     outcomes: Sequence[ParityOutcome],
     alpha: float = 0.5,
@@ -110,9 +114,7 @@ def score_batch(
 
     # Fast path: stack all matrices and compute in one shot
     try:
-        all_matrices = np.stack(
-            [o.parity_matrix for o in outcomes]
-        )  # (N, cycles, subs)
+        all_matrices = np.stack([o.parity_matrix for o in outcomes])  # (N, cycles, subs)
         pass_rates = 1.0 - all_matrices.astype(np.float64).mean(axis=2)  # (N, cycles)
         lf_scores = pass_rates[:, lf_idx].mean(axis=1) if lf_idx.size else np.zeros(len(outcomes))
         hf_scores = pass_rates[:, hf_idx].mean(axis=1) if hf_idx.size else np.zeros(len(outcomes))
@@ -129,6 +131,7 @@ def score_batch(
 # ---------------------------------------------------------------------------
 # Window metrics (fidelity trajectories)
 # ---------------------------------------------------------------------------
+
 
 def compute_window_metric(
     times: np.ndarray,

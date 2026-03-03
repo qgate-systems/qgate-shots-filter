@@ -1,4 +1,5 @@
 """Tests for qgate.adapters.registry — entry-point adapter discovery."""
+
 from __future__ import annotations
 
 import pytest

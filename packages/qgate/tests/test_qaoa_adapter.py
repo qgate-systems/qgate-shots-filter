@@ -1,7 +1,6 @@
 """Tests for qgate.adapters.qaoa_adapter — QAOATSVFAdapter."""
-from __future__ import annotations
 
-import math
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -26,8 +25,7 @@ from qgate.scoring import score_batch
 pytest.importorskip("qiskit")
 pytest.importorskip("qiskit_aer")
 
-from qiskit_aer import AerSimulator  # noqa: E402
-
+from qiskit_aer import AerSimulator
 
 # ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -277,7 +275,8 @@ class TestExtractCutQuality:
         qc = adapter.build_circuit(N_NODES, 2)
         raw = adapter.run(qc, shots=1000)
         cut_ratio, approx_ratio, n = adapter.extract_cut_quality(
-            raw, postselect=False,
+            raw,
+            postselect=False,
         )
         assert 0.0 <= cut_ratio <= 1.0
         assert approx_ratio >= 0.0
@@ -293,8 +292,9 @@ class TestExtractCutQuality:
         )
         qc = adapter.build_circuit(N_NODES, 1)
         raw = adapter.run(qc, shots=2000)
-        cut_ratio, approx_ratio, n_accepted = adapter.extract_cut_quality(
-            raw, postselect=True,
+        cut_ratio, _approx_ratio, n_accepted = adapter.extract_cut_quality(
+            raw,
+            postselect=True,
         )
         assert 0.0 <= cut_ratio <= 1.0
         assert n_accepted >= 0
@@ -576,11 +576,15 @@ class TestDefaultGraph:
 
     def test_auto_graph_deterministic(self):
         a1 = QAOATSVFAdapter(
-            backend=_ideal_backend(), algorithm_mode="standard",
-            n_nodes=5, seed=42,
+            backend=_ideal_backend(),
+            algorithm_mode="standard",
+            n_nodes=5,
+            seed=42,
         )
         a2 = QAOATSVFAdapter(
-            backend=_ideal_backend(), algorithm_mode="standard",
-            n_nodes=5, seed=42,
+            backend=_ideal_backend(),
+            algorithm_mode="standard",
+            n_nodes=5,
+            seed=42,
         )
         assert a1.edges == a2.edges

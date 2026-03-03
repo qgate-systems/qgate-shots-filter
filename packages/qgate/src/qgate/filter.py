@@ -16,6 +16,7 @@ Usage::
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 import logging
@@ -71,9 +72,7 @@ class TrajectoryFilter:
         self._dyn_threshold = DynamicThreshold(config.dynamic_threshold)
         self._galton_threshold: GaltonAdaptiveThreshold | None = None
         if config.dynamic_threshold.mode == "galton":
-            self._galton_threshold = GaltonAdaptiveThreshold(
-                config.dynamic_threshold
-            )
+            self._galton_threshold = GaltonAdaptiveThreshold(config.dynamic_threshold)
 
     def __repr__(self) -> str:
         return (
@@ -128,7 +127,10 @@ class TrajectoryFilter:
 
         logger.info(
             "Filtering %d outcomes — variant=%s, n_sub=%d, n_cyc=%d",
-            total, variant.value, self.config.n_subsystems, self.config.n_cycles,
+            total,
+            variant.value,
+            self.config.n_subsystems,
+            self.config.n_cycles,
         )
 
         # Vectorised per-shot scoring
@@ -151,12 +153,16 @@ class TrajectoryFilter:
             snap = self._galton_threshold.last_snapshot
             logger.debug(
                 "Galton threshold → %.4f  (warmup=%s, window=%d)",
-                threshold, snap.in_warmup, snap.window_size_current,
+                threshold,
+                snap.in_warmup,
+                snap.window_size_current,
             )
         elif dt_cfg.enabled and dt_cfg.mode in ("rolling_z", "fixed") and combined_scores:
             batch_mean = float(np.mean(combined_scores))
             threshold = self._dyn_threshold.update(batch_mean)
-            logger.debug("Dynamic threshold updated → %.4f (batch mean=%.4f)", threshold, batch_mean)
+            logger.debug(
+                "Dynamic threshold updated → %.4f (batch mean=%.4f)", threshold, batch_mean
+            )
         else:
             threshold = self.config.fusion.threshold
 
@@ -169,10 +175,7 @@ class TrajectoryFilter:
             elif variant == ConditioningVariant.HIERARCHICAL:
                 if decide_hierarchical(outcome, self.config.k_fraction):
                     accepted_count += 1
-            elif (
-                variant == ConditioningVariant.SCORE_FUSION
-                and combined_scores[i] >= threshold
-            ):
+            elif variant == ConditioningVariant.SCORE_FUSION and combined_scores[i] >= threshold:
                 accepted_count += 1
 
         acc_prob = accepted_count / total if total > 0 else 0.0
@@ -224,7 +227,10 @@ class TrajectoryFilter:
 
         logger.info(
             "Result: %d/%d accepted (P=%.4f, TTS=%.2f)",
-            accepted_count, total, acc_prob, tts,
+            accepted_count,
+            total,
+            acc_prob,
+            tts,
         )
 
         if self.logger is not None:
@@ -283,6 +289,7 @@ class TrajectoryFilter:
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
 
 def _resolve_adapter(adapter: BaseAdapter | type | str) -> BaseAdapter:
     """Resolve an adapter argument to a :class:`BaseAdapter` instance.

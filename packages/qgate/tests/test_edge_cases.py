@@ -12,6 +12,7 @@ Added in v0.4.0 to cover:
   • CLI --verbose / --quiet / --error-rate flags
   • Qiskit parse_results copy safety
 """
+
 from __future__ import annotations
 
 import json
@@ -29,6 +30,7 @@ from qgate.scoring import score_batch, score_outcome
 # ---------------------------------------------------------------------------
 # Empty / boundary inputs
 # ---------------------------------------------------------------------------
+
 
 class TestFilterEmptyInput:
     def test_filter_zero_outcomes(self):
@@ -73,6 +75,7 @@ class TestSingleSubsystemCycle:
 # ParityOutcome ndarray coercion
 # ---------------------------------------------------------------------------
 
+
 class TestParityOutcomeNdarray:
     def test_list_coerced_to_ndarray(self):
         o = ParityOutcome(2, 1, [[0, 1]])
@@ -100,6 +103,7 @@ class TestParityOutcomeNdarray:
 # ---------------------------------------------------------------------------
 # Vectorised score_batch
 # ---------------------------------------------------------------------------
+
 
 class TestScoreBatchVectorised:
     def test_empty_batch(self):
@@ -131,6 +135,7 @@ class TestScoreBatchVectorised:
 # GateConfig frozen
 # ---------------------------------------------------------------------------
 
+
 class TestGateConfigFrozen:
     def test_cannot_mutate_shots(self):
         from pydantic import ValidationError
@@ -151,6 +156,7 @@ class TestGateConfigFrozen:
 # TrajectoryFilter __repr__
 # ---------------------------------------------------------------------------
 
+
 class TestTrajectoryFilterRepr:
     def test_repr(self):
         config = GateConfig(n_subsystems=4, n_cycles=2, shots=100)
@@ -166,6 +172,7 @@ class TestTrajectoryFilterRepr:
 # ---------------------------------------------------------------------------
 # RunLogger context manager and Parquet buffering
 # ---------------------------------------------------------------------------
+
 
 class TestRunLoggerContextManager:
     def test_context_manager_protocol(self, tmp_path):
@@ -188,6 +195,7 @@ class TestRunLoggerContextManager:
     def test_unknown_extension_warns(self, tmp_path, caplog):
         """Unknown file extension should emit a warning."""
         import logging
+
         with caplog.at_level(logging.WARNING, logger="qgate.run_logging"):
             RunLogger(tmp_path / "data.xyz")
         assert "Unknown file extension" in caplog.text
@@ -196,6 +204,7 @@ class TestRunLoggerContextManager:
 # ---------------------------------------------------------------------------
 # CLI new flags
 # ---------------------------------------------------------------------------
+
 
 class TestCLINewFlags:
     def test_run_with_error_rate(self, tmp_path):
@@ -208,13 +217,20 @@ class TestCLINewFlags:
         config_path = tmp_path / "config.json"
         config_path.write_text(json.dumps(config))
 
-        result = runner.invoke(app, [
-            "run", str(config_path),
-            "--adapter", "mock",
-            "--seed", "42",
-            "--error-rate", "0.5",
-            "--quiet",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "run",
+                str(config_path),
+                "--adapter",
+                "mock",
+                "--seed",
+                "42",
+                "--error-rate",
+                "0.5",
+                "--quiet",
+            ],
+        )
         assert result.exit_code == 0
         assert "P_acc=" in result.output
 
@@ -228,17 +244,23 @@ class TestCLINewFlags:
         config_path = tmp_path / "config.json"
         config_path.write_text(json.dumps(config))
 
-        result = runner.invoke(app, [
-            "run", str(config_path),
-            "--adapter", "mock",
-            "--verbose",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "run",
+                str(config_path),
+                "--adapter",
+                "mock",
+                "--verbose",
+            ],
+        )
         assert result.exit_code == 0
 
 
 # ---------------------------------------------------------------------------
 # filter_counts smoke test
 # ---------------------------------------------------------------------------
+
 
 class TestFilterCounts:
     def test_filter_counts_basic(self):
@@ -259,10 +281,12 @@ class TestFilterCounts:
 # Qiskit parse_results copy safety
 # ---------------------------------------------------------------------------
 
+
 class TestQiskitParseCopySafety:
     def test_copy_safety(self):
         """Mutating one outcome must not affect others from the same bitstring."""
         from qgate.adapters.qiskit_adapter import HAS_QISKIT, QiskitAdapter
+
         if not HAS_QISKIT:
             pytest.skip("Qiskit not installed")
 

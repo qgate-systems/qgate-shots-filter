@@ -1,4 +1,5 @@
 """Tests for qgate.monitors module."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -14,6 +15,7 @@ from qgate.monitors import (
 # ---------------------------------------------------------------------------
 # compute_window_metric
 # ---------------------------------------------------------------------------
+
 
 class TestComputeWindowMetric:
     def test_max_mode(self):
@@ -57,6 +59,7 @@ class TestComputeWindowMetric:
 # score_fusion
 # ---------------------------------------------------------------------------
 
+
 class TestScoreFusion:
     def test_basic_fusion(self):
         accepted, score = score_fusion(0.8, 0.6, alpha=0.5, threshold=0.65)
@@ -89,6 +92,7 @@ class TestScoreFusion:
 # ---------------------------------------------------------------------------
 # MultiRateMonitor
 # ---------------------------------------------------------------------------
+
 
 class TestMultiRateMonitor:
     def test_record_and_fuse(self):
@@ -129,6 +133,7 @@ class TestMultiRateMonitor:
 # ---------------------------------------------------------------------------
 # should_abort_batch
 # ---------------------------------------------------------------------------
+
 
 class TestShouldAbortBatch:
     def test_above_theta(self):

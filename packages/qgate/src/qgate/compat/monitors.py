@@ -15,6 +15,7 @@ conditioning decision rules:
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -27,6 +28,7 @@ from qgate.scoring import compute_window_metric as compute_window_metric
 # ---------------------------------------------------------------------------
 # Score fusion
 # ---------------------------------------------------------------------------
+
 
 def score_fusion(
     lf_score: float,
@@ -60,6 +62,7 @@ def score_fusion(
 # Multi-rate monitor
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class MultiRateMonitor:
     """Stateful monitor tracking HF and LF parity scores across cycles.
@@ -80,6 +83,7 @@ class MultiRateMonitor:
         hf_scores:          Recorded HF scores (every cycle).
         lf_scores:          Recorded LF scores (even cycles only).
     """
+
     n_subsystems: int = 1
     alpha: float = 0.5
     threshold_combined: float = 0.65
@@ -119,6 +123,7 @@ class MultiRateMonitor:
 # ---------------------------------------------------------------------------
 # Batch-level abort
 # ---------------------------------------------------------------------------
+
 
 def should_abort_batch(
     probe_pass_rate: float,

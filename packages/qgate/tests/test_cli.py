@@ -1,4 +1,5 @@
 """Tests for qgate.cli — typer CLI commands."""
+
 from __future__ import annotations
 
 import json
@@ -43,11 +44,17 @@ class TestRunCommand:
         config_path = tmp_path / "config.json"
         config_path.write_text(json.dumps(config))
 
-        result = runner.invoke(app, [
-            "run", str(config_path),
-            "--adapter", "mock",
-            "--seed", "42",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "run",
+                str(config_path),
+                "--adapter",
+                "mock",
+                "--seed",
+                "42",
+            ],
+        )
         assert result.exit_code == 0
         assert "shots=50" in result.output
         assert "P_acc=" in result.output
@@ -58,12 +65,19 @@ class TestRunCommand:
         config_path.write_text(json.dumps(config))
         out_path = tmp_path / "log.jsonl"
 
-        result = runner.invoke(app, [
-            "run", str(config_path),
-            "--adapter", "mock",
-            "--seed", "42",
-            "--output", str(out_path),
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "run",
+                str(config_path),
+                "--adapter",
+                "mock",
+                "--seed",
+                "42",
+                "--output",
+                str(out_path),
+            ],
+        )
         assert result.exit_code == 0
         assert out_path.exists()
         lines = out_path.read_text().strip().split("\n")
@@ -74,10 +88,15 @@ class TestRunCommand:
         config_path = tmp_path / "config.json"
         config_path.write_text(json.dumps(config))
 
-        result = runner.invoke(app, [
-            "run", str(config_path),
-            "--adapter", "nonexistent",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "run",
+                str(config_path),
+                "--adapter",
+                "nonexistent",
+            ],
+        )
         assert result.exit_code == 1
 
     def test_run_shows_run_id(self, tmp_path):
@@ -85,11 +104,17 @@ class TestRunCommand:
         config_path = tmp_path / "config.json"
         config_path.write_text(json.dumps(config))
 
-        result = runner.invoke(app, [
-            "run", str(config_path),
-            "--adapter", "mock",
-            "--seed", "42",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "run",
+                str(config_path),
+                "--adapter",
+                "mock",
+                "--seed",
+                "42",
+            ],
+        )
         assert result.exit_code == 0
         assert "run_id=" in result.output
 

@@ -1,7 +1,6 @@
 """Tests for qgate.adapters.qpe_adapter — QPETSVFAdapter."""
-from __future__ import annotations
 
-import math
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -18,8 +17,6 @@ from qgate.adapters.qpe_adapter import (
 from qgate.conditioning import ParityOutcome
 from qgate.config import (
     ConditioningVariant,
-    DynamicThresholdConfig,
-    FusionConfig,
     GateConfig,
 )
 from qgate.filter import TrajectoryFilter
@@ -29,10 +26,10 @@ from qgate.scoring import score_batch
 pytest.importorskip("qiskit")
 pytest.importorskip("qiskit_aer")
 
-from qiskit_aer import AerSimulator  # noqa: E402
-
+from qiskit_aer import AerSimulator
 
 # ── Helpers ───────────────────────────────────────────────────────────────
+
 
 def _ideal_backend():
     return AerSimulator()
@@ -88,7 +85,7 @@ class TestPhaseHelpers:
         assert abs(phase_error(0.5, 0.0) - 0.5) < 1e-10
 
     def test_phase_error_wraparound(self):
-        # |0.9 − 0.1| should wrap to 0.2
+        # |0.9 - 0.1| should wrap to 0.2
         assert abs(phase_error(0.9, 0.1) - 0.2) < 1e-10
         assert abs(phase_error(0.05, 0.95) - 0.1) < 1e-10
 
@@ -367,8 +364,10 @@ class TestPhaseAccuracy:
         n_prec = 5
         qc = adapter.build_circuit(n_prec, 1)
         raw = adapter.run(qc, shots=2048)
-        best_bs, best_phase, best_count = adapter.extract_best_phase(
-            raw, n_prec, postselect=False,
+        _best_bs, best_phase, _best_count = adapter.extract_best_phase(
+            raw,
+            n_prec,
+            postselect=False,
         )
         # Phase error should be small (≤ 1/2^5 = 0.03125)
         err = phase_error(best_phase, 1.0 / 3.0)
@@ -409,8 +408,12 @@ class TestPhaseMetrics:
         raw = adapter.run(qc, shots=100)
         metrics = adapter.extract_phase_metrics(raw, 3, postselect=False)
         expected_keys = {
-            "fidelity", "mean_phase_error", "entropy",
-            "measured_phase", "true_phase", "total_shots",
+            "fidelity",
+            "mean_phase_error",
+            "entropy",
+            "measured_phase",
+            "true_phase",
+            "total_shots",
             "acceptance_rate",
         }
         assert set(metrics.keys()) == expected_keys
@@ -460,7 +463,9 @@ class TestPhaseMetrics:
         qc = adapter.build_circuit(3, 1)
         raw = adapter.run(qc, shots=500)
         bs, phase_val, count = adapter.extract_best_phase(
-            raw, 3, postselect=False,
+            raw,
+            3,
+            postselect=False,
         )
         assert isinstance(bs, str)
         assert isinstance(phase_val, float)
@@ -501,14 +506,12 @@ class TestPostSelection:
         )
         # Simulate space-separated keys: "anc_bit phase_bits"
         counts = {
-            "1 010": 300,   # accepted, correct phase
-            "0 010": 200,   # rejected
-            "1 110": 100,   # accepted, wrong phase
-            "0 110": 400,   # rejected
+            "1 010": 300,  # accepted, correct phase
+            "0 010": 200,  # rejected
+            "1 110": 100,  # accepted, wrong phase
+            "0 110": 400,  # rejected
         }
-        phase_counts, total_orig, accepted = (
-            adapter._postselect_phase_counts(counts, 3)
-        )
+        phase_counts, total_orig, accepted = adapter._postselect_phase_counts(counts, 3)
         assert total_orig == 1000
         assert accepted == 400  # 300 + 100
         assert phase_counts["010"] == 300
@@ -521,13 +524,11 @@ class TestPostSelection:
             eigenphase=0.25,
         )
         counts = {
-            "1010": 300,   # anc=1, phase=010
-            "0010": 200,   # anc=0
-            "1110": 100,   # anc=1, phase=110
+            "1010": 300,  # anc=1, phase=010
+            "0010": 200,  # anc=0
+            "1110": 100,  # anc=1, phase=110
         }
-        phase_counts, total_orig, accepted = (
-            adapter._postselect_phase_counts(counts, 3)
-        )
+        phase_counts, total_orig, accepted = adapter._postselect_phase_counts(counts, 3)
         assert total_orig == 600
         assert accepted == 400
         assert phase_counts.get("010", 0) == 300
@@ -666,15 +667,18 @@ class TestImportAndRegistration:
 
     def test_import_from_qgate(self):
         from qgate import QPETSVFAdapter as Cls
+
         assert Cls is QPETSVFAdapter
 
     def test_adapter_kind_has_qpe(self):
         from qgate.config import AdapterKind
+
         assert hasattr(AdapterKind, "QPE_TSVF")
         assert AdapterKind.QPE_TSVF.value == "qpe_tsvf"
 
     def test_listed_in_adapters(self):
         from qgate.adapters import list_adapters
+
         adapters = list_adapters()
         assert "qpe_tsvf" in adapters
 
@@ -726,7 +730,7 @@ class TestEdgeCases:
 
     def test_empty_counts_handling(self):
         """Metrics should handle empty count dicts gracefully."""
-        adapter = QPETSVFAdapter(eigenphase=0.25)
+        QPETSVFAdapter(eigenphase=0.25)
         phase_counts: dict[str, int] = {}
         assert phase_fidelity(phase_counts, "010") == 0.0
         assert histogram_entropy(phase_counts) == 0.0

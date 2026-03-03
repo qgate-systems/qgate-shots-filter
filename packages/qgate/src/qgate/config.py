@@ -6,6 +6,7 @@ and carry field-level validation.
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 from enum import Enum
@@ -30,6 +31,7 @@ ThresholdMode = Literal["fixed", "rolling_z", "galton"]
 # ---------------------------------------------------------------------------
 # Enums
 # ---------------------------------------------------------------------------
+
 
 class ConditioningVariant(str, Enum):
     """Supported conditioning strategies."""
@@ -56,6 +58,7 @@ class AdapterKind(str, Enum):
 # Sub-configs
 # ---------------------------------------------------------------------------
 
+
 class FusionConfig(BaseModel):
     """Parameters for α-weighted LF / HF score fusion.
 
@@ -72,12 +75,8 @@ class FusionConfig(BaseModel):
     threshold: float = Field(
         default=0.65, ge=0.0, le=1.0, description="Accept if combined ≥ threshold"
     )
-    hf_cycles: Optional[List[int]] = Field(
-        default=None, description="Override HF cycle indices"
-    )
-    lf_cycles: Optional[List[int]] = Field(
-        default=None, description="Override LF cycle indices"
-    )
+    hf_cycles: Optional[List[int]] = Field(default=None, description="Override HF cycle indices")
+    lf_cycles: Optional[List[int]] = Field(default=None, description="Override LF cycle indices")
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -148,11 +147,14 @@ class DynamicThresholdConfig(BaseModel):
 
     # --- Galton-specific fields (ignored when mode != "galton") -----------
     min_window_size: int = Field(
-        default=100, ge=1,
+        default=100,
+        ge=1,
         description="Galton: minimum samples before adaptation (warmup)",
     )
     target_acceptance: float = Field(
-        default=0.05, gt=0.0, lt=1.0,
+        default=0.05,
+        gt=0.0,
+        lt=1.0,
         description="Galton quantile: target acceptance fraction",
     )
     robust_stats: bool = Field(
@@ -164,7 +166,8 @@ class DynamicThresholdConfig(BaseModel):
         description="Galton: use empirical quantile (True) or z-score (False)",
     )
     z_sigma: float = Field(
-        default=1.645, ge=0.0,
+        default=1.645,
+        ge=0.0,
         description="Galton z-score: number of σ above centre (~5 % one-sided)",
     )
 
@@ -210,6 +213,7 @@ class ProbeConfig(BaseModel):
 # Top-level gate configuration
 # ---------------------------------------------------------------------------
 
+
 class GateConfig(BaseModel):
     """Top-level configuration for a qgate trajectory-filter run.
 
@@ -244,16 +248,12 @@ class GateConfig(BaseModel):
         default=0.9, gt=0.0, le=1.0, description="Hierarchical k-of-N fraction"
     )
     fusion: FusionConfig = Field(default_factory=FusionConfig)
-    dynamic_threshold: DynamicThresholdConfig = Field(
-        default_factory=DynamicThresholdConfig
-    )
+    dynamic_threshold: DynamicThresholdConfig = Field(default_factory=DynamicThresholdConfig)
     probe: ProbeConfig = Field(default_factory=ProbeConfig)
     adapter: AdapterKind = Field(default=AdapterKind.MOCK, description="Adapter back-end")
     adapter_options: Dict[str, Any] = Field(
         default_factory=dict, description="Adapter-specific options"
     )
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Free-form run metadata"
-    )
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Free-form run metadata")
 
     model_config = ConfigDict(extra="forbid", frozen=True)

@@ -10,6 +10,7 @@ Requires the ``qiskit`` extra::
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 import logging
@@ -34,8 +35,7 @@ except ImportError:  # pragma: no cover
 def _require_qiskit() -> None:
     if not HAS_QISKIT:
         raise ImportError(
-            "Qiskit is required for QiskitAdapter.  "
-            "Install with:  pip install qgate[qiskit]"
+            "Qiskit is required for QiskitAdapter.  Install with:  pip install qgate[qiskit]"
         )
 
 
@@ -177,11 +177,13 @@ class QiskitAdapter(BaseAdapter):
             # Each shot gets its own independent ndarray copy
             # to prevent aliasing mutations across shots.
             for _ in range(count):
-                outcomes.append(ParityOutcome(
-                    n_subsystems=n_subsystems,
-                    n_cycles=n_cycles,
-                    parity_matrix=base_matrix.copy(),
-                ))
+                outcomes.append(
+                    ParityOutcome(
+                        n_subsystems=n_subsystems,
+                        n_cycles=n_cycles,
+                        parity_matrix=base_matrix.copy(),
+                    )
+                )
 
         logger.debug("Parsed %d outcomes from Qiskit result", len(outcomes))
         return outcomes

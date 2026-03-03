@@ -1,4 +1,5 @@
 """Tests for qgate.compat — backward-compatible re-exports."""
+
 from __future__ import annotations
 
 

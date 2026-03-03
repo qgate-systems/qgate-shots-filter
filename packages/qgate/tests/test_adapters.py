@@ -1,4 +1,5 @@
 """Tests for qgate.adapters — BaseAdapter, MockAdapter."""
+
 from __future__ import annotations
 
 import pytest
@@ -19,9 +20,9 @@ class TestMockAdapter:
         results = adapter.run(circuit, shots=100)
         assert len(results) == 100
         for matrix in results:
-            assert len(matrix) == 2        # n_cycles
+            assert len(matrix) == 2  # n_cycles
             for row in matrix:
-                assert len(row) == 4       # n_subsystems
+                assert len(row) == 4  # n_subsystems
                 for val in row:
                     assert val in (0, 1)
 

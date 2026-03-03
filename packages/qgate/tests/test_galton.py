@@ -1,4 +1,5 @@
 """Tests for qgate.threshold — GaltonAdaptiveThreshold & estimate_diffusion_width."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -14,6 +15,7 @@ from qgate.threshold import (
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _galton_cfg(**overrides) -> DynamicThresholdConfig:
     """Build a Galton-mode config with sensible test defaults."""
@@ -34,6 +36,7 @@ def _galton_cfg(**overrides) -> DynamicThresholdConfig:
 # ---------------------------------------------------------------------------
 # GaltonAdaptiveThreshold — quantile mode
 # ---------------------------------------------------------------------------
+
 
 class TestGaltonQuantileMode:
     """Verify quantile-based gating targets the expected acceptance."""
@@ -85,6 +88,7 @@ class TestGaltonQuantileMode:
 # GaltonAdaptiveThreshold — robust z-score mode
 # ---------------------------------------------------------------------------
 
+
 class TestGaltonRobustMode:
     """Verify robust stats (MAD-based) are resilient to outliers."""
 
@@ -120,12 +124,16 @@ class TestGaltonRobustMode:
         """Without robust stats, mean is pulled by outliers."""
         rng = np.random.default_rng(123)
         cfg_robust = _galton_cfg(
-            use_quantile=False, robust_stats=True,
-            window_size=500, min_window_size=50,
+            use_quantile=False,
+            robust_stats=True,
+            window_size=500,
+            min_window_size=50,
         )
         cfg_non_robust = _galton_cfg(
-            use_quantile=False, robust_stats=False,
-            window_size=500, min_window_size=50,
+            use_quantile=False,
+            robust_stats=False,
+            window_size=500,
+            min_window_size=50,
         )
 
         clean = rng.normal(0.5, 0.03, size=450).clip(0, 1)
@@ -144,6 +152,7 @@ class TestGaltonRobustMode:
 # ---------------------------------------------------------------------------
 # Warmup behaviour
 # ---------------------------------------------------------------------------
+
 
 class TestGaltonWarmup:
     """Verify threshold falls back to baseline during warmup."""
@@ -180,6 +189,7 @@ class TestGaltonWarmup:
 # Window management
 # ---------------------------------------------------------------------------
 
+
 class TestGaltonWindow:
     def test_window_bounded_by_maxlen(self):
         cfg = _galton_cfg(window_size=100, min_window_size=10)
@@ -202,6 +212,7 @@ class TestGaltonWindow:
 # Reset
 # ---------------------------------------------------------------------------
 
+
 class TestGaltonReset:
     def test_reset_restores_baseline(self):
         cfg = _galton_cfg(baseline=0.70, min_window_size=10)
@@ -219,6 +230,7 @@ class TestGaltonReset:
 # ---------------------------------------------------------------------------
 # Clamping
 # ---------------------------------------------------------------------------
+
 
 class TestGaltonClamping:
     def test_threshold_clamped_to_min(self):
@@ -255,6 +267,7 @@ class TestGaltonClamping:
 # ---------------------------------------------------------------------------
 # Config auto-enable
 # ---------------------------------------------------------------------------
+
 
 class TestGaltonConfig:
     def test_mode_galton_auto_enables(self):
@@ -305,6 +318,7 @@ class TestGaltonConfig:
 # ---------------------------------------------------------------------------
 # Integration with TrajectoryFilter
 # ---------------------------------------------------------------------------
+
 
 class TestGaltonFilterIntegration:
     def test_galton_run(self):
@@ -365,7 +379,9 @@ class TestGaltonFilterIntegration:
         config = GateConfig(
             shots=200,
             dynamic_threshold=DynamicThresholdConfig(
-                mode="galton", baseline=0.55, min_window_size=10,
+                mode="galton",
+                baseline=0.55,
+                min_window_size=10,
             ),
         )
         tf = TrajectoryFilter(config, MockAdapter(seed=42))
@@ -380,7 +396,8 @@ class TestGaltonFilterIntegration:
         config = GateConfig(
             shots=200,
             dynamic_threshold=DynamicThresholdConfig(
-                mode="galton", min_window_size=10,
+                mode="galton",
+                min_window_size=10,
             ),
         )
         tf = TrajectoryFilter(config, MockAdapter(seed=42))
@@ -401,6 +418,7 @@ class TestGaltonFilterIntegration:
 # ---------------------------------------------------------------------------
 # estimate_diffusion_width
 # ---------------------------------------------------------------------------
+
 
 class TestEstimateDiffusionWidth:
     def test_basic_variance(self):

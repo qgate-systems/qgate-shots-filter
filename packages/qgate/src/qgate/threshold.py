@@ -17,6 +17,7 @@ and are wired into :class:`~qgate.filter.TrajectoryFilter` transparently.
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 import logging
@@ -38,6 +39,7 @@ _MAD_TO_SIGMA: float = 1.4826
 # ═══════════════════════════════════════════════════════════════════════════
 # GaltonSnapshot — lightweight telemetry snapshot
 # ═══════════════════════════════════════════════════════════════════════════
+
 
 @dataclass(frozen=True)
 class GaltonSnapshot:
@@ -151,6 +153,7 @@ class DynamicThreshold:
 # ═══════════════════════════════════════════════════════════════════════════
 # GaltonAdaptiveThreshold — distribution-aware gating
 # ═══════════════════════════════════════════════════════════════════════════
+
 
 class GaltonAdaptiveThreshold:
     """Distribution-aware adaptive threshold (Galton / diffusion mode).
@@ -308,7 +311,9 @@ class GaltonAdaptiveThreshold:
             )
             logger.debug(
                 "Galton warmup: %d / %d samples — using baseline %.4f",
-                n, self._config.min_window_size, self._current,
+                n,
+                self._config.min_window_size,
+                self._current,
             )
             return
 
@@ -323,20 +328,12 @@ class GaltonAdaptiveThreshold:
             mu = float(np.mean(arr))
             sigma = float(np.std(arr, ddof=1)) if n > 1 else 0.0
 
-        quantile_val = float(
-            np.quantile(arr, 1.0 - self._config.target_acceptance)
-        )
+        quantile_val = float(np.quantile(arr, 1.0 - self._config.target_acceptance))
 
         # --- Threshold selection --------------------------------------
-        raw = (
-            quantile_val
-            if self._config.use_quantile
-            else mu + self._config.z_sigma * sigma
-        )
+        raw = quantile_val if self._config.use_quantile else mu + self._config.z_sigma * sigma
 
-        clamped = float(
-            max(self._config.min_threshold, min(self._config.max_threshold, raw))
-        )
+        clamped = float(max(self._config.min_threshold, min(self._config.max_threshold, raw)))
         self._current = clamped
 
         # --- Acceptance rate ------------------------------------------
@@ -354,15 +351,20 @@ class GaltonAdaptiveThreshold:
         )
 
         logger.debug(
-            "Galton threshold: %.4f  (μ=%.4f, σ=%.4f, Q=%.4f, "
-            "accept=%.3f, window=%d)",
-            self._current, mu, sigma, quantile_val, accept_rate, n,
+            "Galton threshold: %.4f  (μ=%.4f, σ=%.4f, Q=%.4f, accept=%.3f, window=%d)",
+            self._current,
+            mu,
+            sigma,
+            quantile_val,
+            accept_rate,
+            n,
         )
 
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Utility — diffusion width estimation
 # ═══════════════════════════════════════════════════════════════════════════
+
 
 def estimate_diffusion_width(
     window: list[float] | np.ndarray,
@@ -388,9 +390,7 @@ def estimate_diffusion_width(
     """
     arr = np.asarray(window, dtype=np.float64)
     if arr.size < 2:
-        raise ValueError(
-            f"estimate_diffusion_width requires ≥ 2 observations, got {arr.size}"
-        )
+        raise ValueError(f"estimate_diffusion_width requires ≥ 2 observations, got {arr.size}")
     if robust:
         med = float(np.median(arr))
         mad = float(np.median(np.abs(arr - med)))

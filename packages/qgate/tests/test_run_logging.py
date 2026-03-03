@@ -1,4 +1,5 @@
 """Tests for qgate.run_logging — RunLogger and FilterResult."""
+
 from __future__ import annotations
 
 import json

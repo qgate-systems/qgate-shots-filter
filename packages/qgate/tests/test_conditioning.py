@@ -1,4 +1,5 @@
 """Tests for qgate.conditioning module."""
+
 from __future__ import annotations
 
 import pytest
@@ -16,6 +17,7 @@ from qgate.conditioning import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _outcome(matrix: list[list[int]]) -> ParityOutcome:
     """Shortcut to build a ParityOutcome from a parity matrix."""
     n_cycles = len(matrix)
@@ -26,6 +28,7 @@ def _outcome(matrix: list[list[int]]) -> ParityOutcome:
 # ---------------------------------------------------------------------------
 # ParityOutcome
 # ---------------------------------------------------------------------------
+
 
 class TestParityOutcome:
     def test_subsystem_pass_count_all_pass(self):
@@ -53,6 +56,7 @@ class TestParityOutcome:
 # decide_global
 # ---------------------------------------------------------------------------
 
+
 class TestDecideGlobal:
     def test_all_pass(self):
         o = _outcome([[0, 0, 0], [0, 0, 0]])
@@ -74,6 +78,7 @@ class TestDecideGlobal:
 # ---------------------------------------------------------------------------
 # decide_hierarchical
 # ---------------------------------------------------------------------------
+
 
 class TestDecideHierarchical:
     def test_exact_threshold(self):
@@ -117,6 +122,7 @@ class TestDecideHierarchical:
 # ---------------------------------------------------------------------------
 # decide_score_fusion
 # ---------------------------------------------------------------------------
+
 
 class TestDecideScoreFusion:
     def test_all_pass_accepted(self):
@@ -171,6 +177,7 @@ class TestDecideScoreFusion:
 # ConditioningStats
 # ---------------------------------------------------------------------------
 
+
 class TestConditioningStats:
     def test_acceptance_probability(self):
         stats = ConditioningStats(variant="global", total_shots=100, accepted_shots=25)
@@ -195,6 +202,7 @@ class TestConditioningStats:
 # ---------------------------------------------------------------------------
 # apply_rule_to_batch
 # ---------------------------------------------------------------------------
+
 
 class TestApplyRuleToBatch:
     def _make_batch(self):

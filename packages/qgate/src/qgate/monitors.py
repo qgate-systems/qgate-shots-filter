@@ -10,6 +10,7 @@ Usage unchanged::
 
     from qgate.monitors import MultiRateMonitor, score_fusion
 """
+
 from qgate.compat.monitors import (
     MultiRateMonitor,
     compute_window_metric,

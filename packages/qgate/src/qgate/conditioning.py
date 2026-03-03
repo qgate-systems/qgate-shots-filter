@@ -10,6 +10,7 @@ Usage unchanged::
 
     from qgate.conditioning import ParityOutcome, decide_global
 """
+
 from qgate.compat.conditioning import (
     ConditioningStats,
     ParityOutcome,

@@ -10,6 +10,7 @@ pennylane_adapter.py — PennyLane adapter stub for qgate.
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -39,17 +40,13 @@ class PennyLaneAdapter(BaseAdapter):
                 "Install with:  pip install qgate[pennylane]"
             )
 
-    def build_circuit(
-        self, n_subsystems: int, n_cycles: int, **kwargs: Any
-    ) -> Any:
+    def build_circuit(self, n_subsystems: int, n_cycles: int, **kwargs: Any) -> Any:
         raise NotImplementedError(
             "PennyLaneAdapter.build_circuit is a stub — contributions welcome!"
         )
 
     def run(self, circuit: Any, shots: int, **kwargs: Any) -> Any:
-        raise NotImplementedError(
-            "PennyLaneAdapter.run is a stub — contributions welcome!"
-        )
+        raise NotImplementedError("PennyLaneAdapter.run is a stub — contributions welcome!")
 
     def parse_results(
         self, raw_results: Any, n_subsystems: int, n_cycles: int

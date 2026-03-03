@@ -7,6 +7,7 @@ framework.
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 import random
@@ -78,9 +79,7 @@ class BaseAdapter(ABC):
         run_kwargs: dict[str, Any] | None = None,
     ) -> list[ParityOutcome]:
         """Convenience: build → run → parse in one call."""
-        circuit = self.build_circuit(
-            n_subsystems, n_cycles, **(circuit_kwargs or {})
-        )
+        circuit = self.build_circuit(n_subsystems, n_cycles, **(circuit_kwargs or {}))
         raw = self.run(circuit, shots, **(run_kwargs or {}))
         return self.parse_results(raw, n_subsystems, n_cycles)
 
@@ -88,6 +87,7 @@ class BaseAdapter(ABC):
 # ---------------------------------------------------------------------------
 # Mock adapter (for testing)
 # ---------------------------------------------------------------------------
+
 
 class MockAdapter(BaseAdapter):
     """In-memory adapter that generates synthetic parity outcomes.

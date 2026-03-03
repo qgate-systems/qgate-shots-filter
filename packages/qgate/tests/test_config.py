@@ -1,4 +1,5 @@
 """Tests for qgate.config — Pydantic v2 configuration models."""
+
 from __future__ import annotations
 
 import pytest
@@ -16,6 +17,7 @@ from qgate.config import (
 # ---------------------------------------------------------------------------
 # FusionConfig
 # ---------------------------------------------------------------------------
+
 
 class TestFusionConfig:
     def test_defaults(self):
@@ -56,6 +58,7 @@ class TestFusionConfig:
 # DynamicThresholdConfig
 # ---------------------------------------------------------------------------
 
+
 class TestDynamicThresholdConfig:
     def test_defaults(self):
         dtc = DynamicThresholdConfig()
@@ -78,6 +81,7 @@ class TestDynamicThresholdConfig:
 # ProbeConfig
 # ---------------------------------------------------------------------------
 
+
 class TestProbeConfig:
     def test_defaults(self):
         pc = ProbeConfig()
@@ -93,6 +97,7 @@ class TestProbeConfig:
 # ---------------------------------------------------------------------------
 # GateConfig
 # ---------------------------------------------------------------------------
+
 
 class TestGateConfig:
     def test_defaults(self):
@@ -158,6 +163,7 @@ class TestGateConfig:
 # ---------------------------------------------------------------------------
 # Enum values
 # ---------------------------------------------------------------------------
+
 
 class TestEnums:
     def test_conditioning_variants(self):

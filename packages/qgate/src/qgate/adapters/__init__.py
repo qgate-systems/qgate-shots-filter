@@ -21,6 +21,7 @@ Adapter discovery::
     print(list_adapters())            # {"mock": "qgate.adapters.base:MockAdapter", ...}
     AdapterCls = load_adapter("mock")
 """
+
 from qgate.adapters.base import BaseAdapter, MockAdapter
 from qgate.adapters.registry import list_adapters, load_adapter
 

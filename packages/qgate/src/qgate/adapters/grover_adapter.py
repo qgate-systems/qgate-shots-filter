@@ -21,6 +21,7 @@ The adapter supports two algorithm variants via ``algorithm_mode``:
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 import math
@@ -34,7 +35,7 @@ from qgate.conditioning import ParityOutcome
 # We guard Qiskit imports so the module can be imported without qiskit
 # installed (load-time tolerance, same as QiskitAdapter).
 try:
-    from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, transpile
+    from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, transpile
     from qiskit.circuit.library import RXGate, RYGate, RZGate  # noqa: F401
 
     _HAS_QISKIT = True
@@ -47,7 +48,7 @@ except ImportError:  # pragma: no cover
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def _oracle_101(qc: "QuantumCircuit", qubits: list[int]) -> None:
+def _oracle_101(qc: QuantumCircuit, qubits: list[int]) -> None:
     """Mark |101⟩ by flipping its phase via X-CCZ-X."""
     q0, q1, q2 = qubits
     qc.x(q1)
@@ -57,7 +58,7 @@ def _oracle_101(qc: "QuantumCircuit", qubits: list[int]) -> None:
     qc.x(q1)
 
 
-def _grover_diffusion(qc: "QuantumCircuit", qubits: list[int]) -> None:
+def _grover_diffusion(qc: QuantumCircuit, qubits: list[int]) -> None:
     """Standard 2|s⟩⟨s| − I inversion about mean."""
     for q in qubits:
         qc.h(q)
@@ -72,7 +73,7 @@ def _grover_diffusion(qc: "QuantumCircuit", qubits: list[int]) -> None:
 
 
 def _chaotic_ansatz(
-    qc: "QuantumCircuit",
+    qc: QuantumCircuit,
     qubits: list[int],
     iteration: int,
     rng: np.random.Generator,
@@ -95,7 +96,7 @@ def _chaotic_ansatz(
 
 
 def _add_postselection_ancilla(
-    qc: "QuantumCircuit",
+    qc: QuantumCircuit,
     search_qubits: list[int],
     ancilla_qubit: int,
     ancilla_cbit: Any,
@@ -118,7 +119,7 @@ def _add_postselection_ancilla(
     """
     from qiskit.circuit.library import RYGate
 
-    q0, q1, q2 = search_qubits
+    _q0, q1, _q2 = search_qubits
     anc = ancilla_qubit
 
     # Flip q1: |101⟩ → |111⟩
@@ -126,7 +127,7 @@ def _add_postselection_ancilla(
 
     # Multi-controlled Ry(weak_angle) on ancilla, controlled by q0, q1, q2
     mcry = RYGate(weak_angle).control(len(search_qubits))
-    qc.append(mcry, search_qubits + [anc])
+    qc.append(mcry, [*search_qubits, anc])
 
     # Unflip q1
     qc.x(q1)
@@ -170,8 +171,7 @@ class GroverTSVFAdapter(BaseAdapter):
     ) -> None:
         if not _HAS_QISKIT:  # pragma: no cover
             raise ImportError(
-                "GroverTSVFAdapter requires Qiskit. "
-                "Install with: pip install qgate[qiskit]"
+                "GroverTSVFAdapter requires Qiskit. Install with: pip install qgate[qiskit]"
             )
         self.backend = backend
         self.algorithm_mode = algorithm_mode
@@ -191,7 +191,7 @@ class GroverTSVFAdapter(BaseAdapter):
         n_subsystems: int,
         n_cycles: int,
         **kwargs: Any,
-    ) -> "QuantumCircuit":
+    ) -> QuantumCircuit:
         """Build the Grover circuit.
 
         ``n_subsystems`` = number of search qubits (must match
@@ -212,8 +212,7 @@ class GroverTSVFAdapter(BaseAdapter):
             return self._build_tsvf(n_subsystems, n_cycles, seed_offset)
         else:
             raise ValueError(
-                f"Unknown algorithm_mode: {self.algorithm_mode!r}. "
-                f"Use 'standard' or 'tsvf'."
+                f"Unknown algorithm_mode: {self.algorithm_mode!r}. Use 'standard' or 'tsvf'."
             )
 
     def run(
@@ -230,10 +229,10 @@ class GroverTSVFAdapter(BaseAdapter):
             raise RuntimeError("No backend configured for GroverTSVFAdapter")
 
         try:
-            from qiskit_ibm_runtime import SamplerV2 as Sampler
             from qiskit.transpiler.preset_passmanagers import (
                 generate_preset_pass_manager,
             )
+            from qiskit_ibm_runtime import SamplerV2 as Sampler
 
             pm = generate_preset_pass_manager(
                 backend=self.backend,
@@ -281,7 +280,6 @@ class GroverTSVFAdapter(BaseAdapter):
         """
         # Extract per-shot bitstrings
         counts = self._extract_counts(raw_results)
-        circuit: QuantumCircuit = raw_results.get("circuit") if isinstance(raw_results, dict) else None
 
         outcomes: list[ParityOutcome] = []
         for bitstring, count in counts.items():
@@ -300,14 +298,14 @@ class GroverTSVFAdapter(BaseAdapter):
     # Public helpers (beyond BaseAdapter)
     # ------------------------------------------------------------------
 
-    def get_transpiled_depth(self, circuit: "QuantumCircuit") -> int:
+    def get_transpiled_depth(self, circuit: QuantumCircuit) -> int:
         """Return the depth of the transpiled circuit."""
         transpiled = transpile(
             circuit,
             backend=self.backend,
             optimization_level=self.optimization_level,
         )
-        return transpiled.depth()
+        return int(transpiled.depth())
 
     def extract_target_probability(
         self,
@@ -348,7 +346,7 @@ class GroverTSVFAdapter(BaseAdapter):
     # Private circuit builders
     # ------------------------------------------------------------------
 
-    def _build_standard(self, n_sub: int, n_iter: int) -> "QuantumCircuit":
+    def _build_standard(self, n_sub: int, n_iter: int) -> QuantumCircuit:
         """Standard Grover: oracle + diffusion, no ancilla."""
         qr = QuantumRegister(n_sub, "q")
         cr = ClassicalRegister(n_sub, "c")
@@ -363,8 +361,11 @@ class GroverTSVFAdapter(BaseAdapter):
         return qc
 
     def _build_tsvf(
-        self, n_sub: int, n_iter: int, seed_offset: int = 0,
-    ) -> "QuantumCircuit":
+        self,
+        n_sub: int,
+        n_iter: int,
+        seed_offset: int = 0,
+    ) -> QuantumCircuit:
         """TSVF chaotic Grover: oracle + chaotic ansatz + ancilla probe."""
         qr = QuantumRegister(n_sub, "q")
         anc_r = QuantumRegister(1, "anc")
@@ -388,7 +389,11 @@ class GroverTSVFAdapter(BaseAdapter):
                 qc.reset(anc_qubit)
             angle = self.weak_angle_base + self.weak_angle_ramp * min(it, 4)
             _add_postselection_ancilla(
-                qc, search_qubits, anc_qubit, cr_anc[0], weak_angle=angle,
+                qc,
+                search_qubits,
+                anc_qubit,
+                cr_anc[0],
+                weak_angle=angle,
             )
             qc.barrier()
 
@@ -458,7 +463,7 @@ class GroverTSVFAdapter(BaseAdapter):
             # Space-separated: last part is first register (search)
             return key.split()[-1]
         # Concatenated: last n_search_qubits chars
-        return key[-self.n_search_qubits:]
+        return key[-self.n_search_qubits :]
 
     def _split_ancilla_search(self, bitstring: str) -> tuple[str, str]:
         """Split bitstring into (ancilla_bit, search_bits)."""

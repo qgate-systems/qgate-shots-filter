@@ -1,7 +1,6 @@
 """Tests for qgate.adapters.grover_adapter — GroverTSVFAdapter."""
-from __future__ import annotations
 
-import math
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -21,10 +20,10 @@ from qgate.scoring import score_batch
 pytest.importorskip("qiskit")
 pytest.importorskip("qiskit_aer")
 
-from qiskit_aer import AerSimulator  # noqa: E402
-
+from qiskit_aer import AerSimulator
 
 # ── Helpers ───────────────────────────────────────────────────────────────
+
 
 def _ideal_backend():
     return AerSimulator()

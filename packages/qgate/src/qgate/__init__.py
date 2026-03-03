@@ -26,15 +26,16 @@ Install extras for specific backends::
 
 License: QGATE SOURCE AVAILABLE EVALUATION LICENSE v1.2 — see LICENSE
 """
+
 __version__ = "0.5.0"
 
 # ── Primary public API ────────────────────────────────────────────────────
 from qgate.adapters.base import BaseAdapter
 from qgate.adapters.grover_adapter import GroverTSVFAdapter
 from qgate.adapters.qaoa_adapter import QAOATSVFAdapter
-from qgate.adapters.vqe_adapter import VQETSVFAdapter
 from qgate.adapters.qpe_adapter import QPETSVFAdapter
 from qgate.adapters.registry import list_adapters, load_adapter
+from qgate.adapters.vqe_adapter import VQETSVFAdapter
 
 # ── Legacy / backward-compatible re-exports ──────────────────────────────
 # These symbols were available in qgate <= 0.2; kept for compatibility.

@@ -19,6 +19,7 @@ existing code continues to work.
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 import math
@@ -32,6 +33,7 @@ import numpy as np
 # Data container
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ParityOutcome:
     """Parsed mid-circuit measurement outcomes for one shot.
@@ -44,6 +46,7 @@ class ParityOutcome:
                        Accepts ``list[list[int]]`` *or* ``np.ndarray``
                        on construction (coerced to ``np.ndarray``).
     """
+
     n_subsystems: int
     n_cycles: int
     parity_matrix: Union[np.ndarray, list] = field(default_factory=list)  # noqa: UP007
@@ -52,9 +55,7 @@ class ParityOutcome:
         if not isinstance(self.parity_matrix, np.ndarray):
             self.parity_matrix = np.asarray(self.parity_matrix, dtype=np.int8)
         if self.parity_matrix.ndim == 0 or self.parity_matrix.size == 0:
-            self.parity_matrix = np.zeros(
-                (self.n_cycles, self.n_subsystems), dtype=np.int8
-            )
+            self.parity_matrix = np.zeros((self.n_cycles, self.n_subsystems), dtype=np.int8)
 
     # Convenience -----------------------------------------------------------
 
@@ -81,6 +82,7 @@ class ParityOutcome:
 # ---------------------------------------------------------------------------
 # Decision rules
 # ---------------------------------------------------------------------------
+
 
 def decide_global(outcome: ParityOutcome) -> bool:
     """Global conditioning — all subsystems pass all cycles.
@@ -186,9 +188,11 @@ def decide_score_fusion(
 # Batch helpers
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ConditioningStats:
     """Aggregated statistics after applying a conditioning rule to many shots."""
+
     variant: str
     total_shots: int = 0
     accepted_shots: int = 0
@@ -244,9 +248,7 @@ def apply_rule_to_batch(
             if decide_hierarchical(outcome, k_fraction):
                 stats.accepted_shots += 1
         elif variant == "score_fusion":
-            accepted, score = decide_score_fusion(
-                outcome, alpha, threshold_combined
-            )
+            accepted, score = decide_score_fusion(outcome, alpha, threshold_combined)
             stats.scores.append(score)
             if accepted:
                 stats.accepted_shots += 1

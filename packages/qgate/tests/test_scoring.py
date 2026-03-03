@@ -1,4 +1,5 @@
 """Tests for qgate.scoring — score computation and fusion."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -17,6 +18,7 @@ def _outcome(matrix: list[list[int]]) -> ParityOutcome:
 # ---------------------------------------------------------------------------
 # fuse_scores
 # ---------------------------------------------------------------------------
+
 
 class TestFuseScores:
     def test_basic(self):
@@ -42,6 +44,7 @@ class TestFuseScores:
 # score_outcome
 # ---------------------------------------------------------------------------
 
+
 class TestScoreOutcome:
     def test_all_pass(self):
         o = _outcome([[0, 0], [0, 0], [0, 0], [0, 0]])
@@ -62,9 +65,7 @@ class TestScoreOutcome:
 
     def test_custom_cycles(self):
         o = _outcome([[0, 0], [1, 1], [0, 0]])
-        lf, hf, combined = score_outcome(
-            o, alpha=0.5, lf_cycles=[0], hf_cycles=[1, 2]
-        )
+        lf, hf, combined = score_outcome(o, alpha=0.5, lf_cycles=[0], hf_cycles=[1, 2])
         # LF: cycle0 rate=1.0; HF: cycle1 rate=0.0, cycle2 rate=1.0 → mean=0.5
         assert lf == pytest.approx(1.0)
         assert hf == pytest.approx(0.5)
@@ -74,6 +75,7 @@ class TestScoreOutcome:
 # ---------------------------------------------------------------------------
 # score_batch
 # ---------------------------------------------------------------------------
+
 
 class TestScoreBatch:
     def test_batch_length(self):
@@ -87,6 +89,7 @@ class TestScoreBatch:
 # ---------------------------------------------------------------------------
 # compute_window_metric
 # ---------------------------------------------------------------------------
+
 
 class TestComputeWindowMetric:
     def test_max_mode(self):
@@ -105,6 +108,4 @@ class TestComputeWindowMetric:
 
     def test_unknown_mode(self):
         with pytest.raises(ValueError, match="Unknown mode"):
-            compute_window_metric(
-                np.array([0.0, 1.0]), np.array([0.5, 0.5]), mode="median"
-            )
+            compute_window_metric(np.array([0.0, 1.0]), np.array([0.5, 0.5]), mode="median")

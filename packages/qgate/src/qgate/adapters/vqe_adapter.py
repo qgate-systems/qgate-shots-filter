@@ -32,6 +32,7 @@ The adapter supports two algorithm variants via ``algorithm_mode``:
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 import math
@@ -44,7 +45,7 @@ from qgate.conditioning import ParityOutcome
 
 # Guard Qiskit imports for load-time tolerance.
 try:
-    from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, transpile
+    from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, transpile
     from qiskit.circuit.library import RYGate
 
     _HAS_QISKIT = True
@@ -71,12 +72,12 @@ def tfim_exact_ground_energy(
     Returns:
         The minimum eigenvalue of H.
     """
-    dim = 2 ** n_qubits
+    dim = 2**n_qubits
 
     # Build Pauli matrices
-    I2 = np.eye(2)
-    Z = np.array([[1, 0], [0, -1]], dtype=complex)
-    X = np.array([[0, 1], [1, 0]], dtype=complex)
+    eye2 = np.eye(2)
+    pauli_z = np.array([[1, 0], [0, -1]], dtype=complex)
+    pauli_x = np.array([[0, 1], [1, 0]], dtype=complex)
 
     def _kron_chain(ops: list[np.ndarray]) -> np.ndarray:
         result = ops[0]
@@ -84,22 +85,22 @@ def tfim_exact_ground_energy(
             result = np.kron(result, op)
         return result
 
-    H = np.zeros((dim, dim), dtype=complex)
+    ham = np.zeros((dim, dim), dtype=complex)
 
-    # ZZ coupling: −J Σ Z_i Z_{i+1}
+    # ZZ coupling: -J Sum Z_i Z_{i+1}
     for i in range(n_qubits - 1):
-        ops = [I2] * n_qubits
-        ops[i] = Z
-        ops[i + 1] = Z
-        H -= j_coupling * _kron_chain(ops)
+        ops = [eye2] * n_qubits
+        ops[i] = pauli_z
+        ops[i + 1] = pauli_z
+        ham -= j_coupling * _kron_chain(ops)
 
-    # Transverse field: −h Σ X_i
+    # Transverse field: -h Sum X_i
     for i in range(n_qubits):
-        ops = [I2] * n_qubits
-        ops[i] = X
-        H -= h_field * _kron_chain(ops)
+        ops = [eye2] * n_qubits
+        ops[i] = pauli_x
+        ham -= h_field * _kron_chain(ops)
 
-    eigenvalues = np.linalg.eigvalsh(H.real)
+    eigenvalues = np.linalg.eigvalsh(ham.real)
     return float(eigenvalues[0])
 
 
@@ -122,7 +123,7 @@ def compute_energy_from_bitstring(
         The ZZ contribution to the energy.
     """
     bits = [int(b) for b in bitstring[-n_qubits:]]
-    spins = [1 - 2 * b for b in bits]  # 0→+1, 1→−1
+    spins = [1 - 2 * b for b in bits]  # 0->+1, 1->-1
 
     energy = 0.0
     for i in range(len(spins) - 1):
@@ -181,7 +182,7 @@ def energy_ratio(
 
 
 def _hardware_efficient_layer(
-    qc: "QuantumCircuit",
+    qc: QuantumCircuit,
     qubits: list[int],
     params: np.ndarray,
 ) -> None:
@@ -200,7 +201,7 @@ def _hardware_efficient_layer(
 
 
 def _chaotic_vqe_ansatz(
-    qc: "QuantumCircuit",
+    qc: QuantumCircuit,
     qubits: list[int],
     layer: int,
     rng: np.random.Generator,
@@ -228,7 +229,7 @@ def _chaotic_vqe_ansatz(
 
 
 def _add_energy_probe_ancilla(
-    qc: "QuantumCircuit",
+    qc: QuantumCircuit,
     qubits: list[int],
     ancilla_qubit: int,
     ancilla_cbit: Any,
@@ -325,8 +326,7 @@ class VQETSVFAdapter(BaseAdapter):
     ) -> None:
         if not _HAS_QISKIT:  # pragma: no cover
             raise ImportError(
-                "VQETSVFAdapter requires Qiskit. "
-                "Install with: pip install qgate[qiskit]"
+                "VQETSVFAdapter requires Qiskit. Install with: pip install qgate[qiskit]"
             )
         self.backend = backend
         self.algorithm_mode = algorithm_mode
@@ -343,7 +343,9 @@ class VQETSVFAdapter(BaseAdapter):
         self._params = params
 
     def _get_params(
-        self, n_layers: int, rng: np.random.Generator,
+        self,
+        n_layers: int,
+        rng: np.random.Generator,
     ) -> np.ndarray:
         """Resolve variational parameters for n_layers.
 
@@ -359,7 +361,8 @@ class VQETSVFAdapter(BaseAdapter):
             # Pad with random if not enough layers
             if p.ndim == 3:
                 extra = rng.uniform(
-                    -math.pi, math.pi,
+                    -math.pi,
+                    math.pi,
                     size=(n_layers - p.shape[0], self.n_qubits, 2),
                 )
                 return np.concatenate([p, extra], axis=0)
@@ -383,7 +386,7 @@ class VQETSVFAdapter(BaseAdapter):
         n_subsystems: int,
         n_cycles: int,
         **kwargs: Any,
-    ) -> "QuantumCircuit":
+    ) -> QuantumCircuit:
         """Build the VQE circuit.
 
         ``n_subsystems`` = number of qubits (must match ``n_qubits``).
@@ -393,8 +396,7 @@ class VQETSVFAdapter(BaseAdapter):
         """
         if n_subsystems != self.n_qubits:
             raise ValueError(
-                f"n_subsystems ({n_subsystems}) must match n_qubits "
-                f"({self.n_qubits})"
+                f"n_subsystems ({n_subsystems}) must match n_qubits ({self.n_qubits})"
             )
         if self.algorithm_mode == "standard":
             return self._build_standard(n_subsystems, n_cycles, **kwargs)
@@ -403,8 +405,7 @@ class VQETSVFAdapter(BaseAdapter):
             return self._build_tsvf(n_subsystems, n_cycles, seed_offset)
         else:
             raise ValueError(
-                f"Unknown algorithm_mode: {self.algorithm_mode!r}. "
-                f"Use 'standard' or 'tsvf'."
+                f"Unknown algorithm_mode: {self.algorithm_mode!r}. Use 'standard' or 'tsvf'."
             )
 
     def run(
@@ -421,10 +422,10 @@ class VQETSVFAdapter(BaseAdapter):
             raise RuntimeError("No backend configured for VQETSVFAdapter")
 
         try:
-            from qiskit_ibm_runtime import SamplerV2 as Sampler
             from qiskit.transpiler.preset_passmanagers import (
                 generate_preset_pass_manager,
             )
+            from qiskit_ibm_runtime import SamplerV2 as Sampler
 
             pm = generate_preset_pass_manager(
                 backend=self.backend,
@@ -490,14 +491,14 @@ class VQETSVFAdapter(BaseAdapter):
     # Public helpers (beyond BaseAdapter)
     # ------------------------------------------------------------------
 
-    def get_transpiled_depth(self, circuit: "QuantumCircuit") -> int:
+    def get_transpiled_depth(self, circuit: QuantumCircuit) -> int:
         """Return the depth of the transpiled circuit."""
         transpiled = transpile(
             circuit,
             backend=self.backend,
             optimization_level=self.optimization_level,
         )
-        return transpiled.depth()
+        return int(transpiled.depth())
 
     def extract_energy(
         self,
@@ -518,7 +519,10 @@ class VQETSVFAdapter(BaseAdapter):
             if total == 0:
                 return 0.0, 0
             e = estimate_energy_from_counts(
-                search_counts, self.n_qubits, self.j_coupling, self.h_field,
+                search_counts,
+                self.n_qubits,
+                self.j_coupling,
+                self.h_field,
             )
             return e, total
 
@@ -528,7 +532,10 @@ class VQETSVFAdapter(BaseAdapter):
         if total == 0:
             return 0.0, 0
         e = estimate_energy_from_counts(
-            search_counts, self.n_qubits, self.j_coupling, self.h_field,
+            search_counts,
+            self.n_qubits,
+            self.j_coupling,
+            self.h_field,
         )
         return e, total
 
@@ -544,7 +551,9 @@ class VQETSVFAdapter(BaseAdapter):
         """
         est_energy, n_used = self.extract_energy(raw_results, postselect)
         exact = tfim_exact_ground_energy(
-            self.n_qubits, self.j_coupling, self.h_field,
+            self.n_qubits,
+            self.j_coupling,
+            self.h_field,
         )
         ratio = energy_ratio(est_energy, exact)
         err = energy_error(est_energy, exact)
@@ -574,7 +583,10 @@ class VQETSVFAdapter(BaseAdapter):
                 search_bits = self._extract_search_bits(key_str)
 
             e = compute_energy_from_bitstring(
-                search_bits, self.n_qubits, self.j_coupling, self.h_field,
+                search_bits,
+                self.n_qubits,
+                self.j_coupling,
+                self.h_field,
             )
             if val > best_count or (val == best_count and e < best_energy):
                 best_bs = search_bits
@@ -586,7 +598,9 @@ class VQETSVFAdapter(BaseAdapter):
     def get_exact_ground_energy(self) -> float:
         """Return the exact ground-state energy for this TFIM instance."""
         return tfim_exact_ground_energy(
-            self.n_qubits, self.j_coupling, self.h_field,
+            self.n_qubits,
+            self.j_coupling,
+            self.h_field,
         )
 
     # ------------------------------------------------------------------
@@ -594,8 +608,11 @@ class VQETSVFAdapter(BaseAdapter):
     # ------------------------------------------------------------------
 
     def _build_standard(
-        self, n_sub: int, n_layers: int, **kwargs: Any,
-    ) -> "QuantumCircuit":
+        self,
+        n_sub: int,
+        n_layers: int,
+        **kwargs: Any,
+    ) -> QuantumCircuit:
         """Standard VQE: hardware-efficient ansatz, no ancilla."""
         qr = QuantumRegister(n_sub, "q")
         cr = ClassicalRegister(n_sub, "c")
@@ -618,8 +635,11 @@ class VQETSVFAdapter(BaseAdapter):
         return qc
 
     def _build_tsvf(
-        self, n_sub: int, n_layers: int, seed_offset: int = 0,
-    ) -> "QuantumCircuit":
+        self,
+        n_sub: int,
+        n_layers: int,
+        seed_offset: int = 0,
+    ) -> QuantumCircuit:
         """TSVF VQE: HW-efficient ansatz + chaotic layers + ancilla probe."""
         qr = QuantumRegister(n_sub, "q")
         anc_r = QuantumRegister(1, "anc")
@@ -652,7 +672,10 @@ class VQETSVFAdapter(BaseAdapter):
             # Weak-measurement energy probe
             angle = self.weak_angle_base + self.weak_angle_ramp * min(layer, 4)
             _add_energy_probe_ancilla(
-                qc, qubits, anc_qubit, cr_anc[0],
+                qc,
+                qubits,
+                anc_qubit,
+                cr_anc[0],
                 n_qubits=self.n_qubits,
                 weak_angle=angle,
             )
@@ -690,9 +713,7 @@ class VQETSVFAdapter(BaseAdapter):
         if len(creg_names) <= 1:
             name = creg_names[0] if creg_names else "c"
             try:
-                return {
-                    str(k): int(v) for k, v in pub.data[name].get_counts().items()
-                }
+                return {str(k): int(v) for k, v in pub.data[name].get_counts().items()}
             except Exception:
                 return {}
 
@@ -713,14 +734,14 @@ class VQETSVFAdapter(BaseAdapter):
         except Exception:
             name = creg_names[0]
             try:
-                return {
-                    str(k): int(v) for k, v in pub.data[name].get_counts().items()
-                }
+                return {str(k): int(v) for k, v in pub.data[name].get_counts().items()}
             except Exception:
                 return {}
 
     def _to_search_counts(
-        self, counts: dict[str, int], postselect: bool,
+        self,
+        counts: dict[str, int],
+        postselect: bool,
     ) -> dict[str, int]:
         """Convert raw counts to search-register-only counts.
 
@@ -743,7 +764,7 @@ class VQETSVFAdapter(BaseAdapter):
         key = bitstring.strip()
         if " " in key:
             return key.split()[-1]
-        return key[-self.n_qubits:]
+        return key[-self.n_qubits :]
 
     def _split_ancilla_search(self, bitstring: str) -> tuple[str, str]:
         """Split bitstring into (ancilla_bit, search_bits)."""
@@ -777,7 +798,8 @@ class VQETSVFAdapter(BaseAdapter):
 
             if anc_bit == "1":
                 qubit_quality = self._compute_qubit_energy_quality(
-                    search_bits, n_subsystems,
+                    search_bits,
+                    n_subsystems,
                 )
                 matrix = np.tile(qubit_quality, (n_cycles, 1))
             else:
@@ -785,7 +807,8 @@ class VQETSVFAdapter(BaseAdapter):
         else:
             search_bits = self._extract_search_bits(bitstring)
             qubit_quality = self._compute_qubit_energy_quality(
-                search_bits, n_subsystems,
+                search_bits,
+                n_subsystems,
             )
             matrix = np.tile(qubit_quality, (n_cycles, 1))
 

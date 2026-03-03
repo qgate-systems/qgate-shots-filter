@@ -13,6 +13,7 @@ Powered by `typer <https://typer.tiangolo.com>`_.
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 import logging
@@ -36,6 +37,7 @@ app = typer.Typer(
 # Verbosity callback (applied globally)
 # ---------------------------------------------------------------------------
 
+
 def _configure_logging(verbose: bool, quiet: bool) -> None:
     """Set up stdlib logging based on CLI flags."""
     if quiet:
@@ -54,6 +56,7 @@ def _configure_logging(verbose: bool, quiet: bool) -> None:
 # ---------------------------------------------------------------------------
 # Commands
 # ---------------------------------------------------------------------------
+
 
 @app.command()
 def adapters() -> None:
@@ -99,8 +102,10 @@ def validate(
     try:
         text = config_path.read_text()
         cfg = GateConfig.model_validate_json(text)
-        typer.echo(f"✅  Config valid — variant={cfg.variant.value}, "
-                   f"n_subsystems={cfg.n_subsystems}, shots={cfg.shots}")
+        typer.echo(
+            f"✅  Config valid — variant={cfg.variant.value}, "
+            f"n_subsystems={cfg.n_subsystems}, shots={cfg.shots}"
+        )
     except Exception as exc:
         typer.echo(f"❌  Validation error: {exc}", err=True)
         raise typer.Exit(code=1) from None
@@ -117,11 +122,11 @@ def run(
     output: Optional[Path] = typer.Option(
         None, "--output", "-o", help="Log output file (.jsonl, .csv, .parquet)"
     ),
-    seed: Optional[int] = typer.Option(
-        None, "--seed", "-s", help="Random seed (mock adapter)"
-    ),
+    seed: Optional[int] = typer.Option(None, "--seed", "-s", help="Random seed (mock adapter)"),
     error_rate: Optional[float] = typer.Option(
-        None, "--error-rate", "-e",
+        None,
+        "--error-rate",
+        "-e",
         help="Mock adapter per-subsystem per-cycle error rate (default 0.05)",
     ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="DEBUG-level logging"),
@@ -140,7 +145,10 @@ def run(
 
     # Build adapter
     backend_adapter = _make_adapter(
-        adapter, seed=seed, error_rate=error_rate, config=cfg,
+        adapter,
+        seed=seed,
+        error_rate=error_rate,
+        config=cfg,
     )
 
     # Optional logger (use context manager to flush Parquet on exit)
@@ -162,8 +170,9 @@ def run(
         f"TTS={result.tts:.2f}"
     )
     if result.mean_combined_score is not None:
-        typer.echo(f"mean_score={result.mean_combined_score:.4f}  "
-                   f"threshold={result.threshold_used:.4f}")
+        typer.echo(
+            f"mean_score={result.mean_combined_score:.4f}  threshold={result.threshold_used:.4f}"
+        )
 
     if output:
         typer.echo(f"📝  Logged to {output}")
@@ -172,6 +181,7 @@ def run(
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_adapter(
     name: str,
@@ -190,8 +200,7 @@ def _make_adapter(
     available = list_adapters()
     if name not in available:
         typer.echo(
-            f"❌  Unknown adapter: {name}. "
-            f"Available: {', '.join(sorted(available))}",
+            f"❌  Unknown adapter: {name}. Available: {', '.join(sorted(available))}",
             err=True,
         )
         raise typer.Exit(code=1)

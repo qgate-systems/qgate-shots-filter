@@ -10,6 +10,7 @@ cirq_adapter.py — Cirq adapter stub for qgate.
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -35,25 +36,16 @@ class CirqAdapter(BaseAdapter):
     def __init__(self, **kwargs: Any) -> None:
         if not HAS_CIRQ:
             raise ImportError(
-                "Cirq is required for CirqAdapter.  "
-                "Install with:  pip install qgate[cirq]"
+                "Cirq is required for CirqAdapter.  Install with:  pip install qgate[cirq]"
             )
 
-    def build_circuit(
-        self, n_subsystems: int, n_cycles: int, **kwargs: Any
-    ) -> Any:
-        raise NotImplementedError(
-            "CirqAdapter.build_circuit is a stub — contributions welcome!"
-        )
+    def build_circuit(self, n_subsystems: int, n_cycles: int, **kwargs: Any) -> Any:
+        raise NotImplementedError("CirqAdapter.build_circuit is a stub — contributions welcome!")
 
     def run(self, circuit: Any, shots: int, **kwargs: Any) -> Any:
-        raise NotImplementedError(
-            "CirqAdapter.run is a stub — contributions welcome!"
-        )
+        raise NotImplementedError("CirqAdapter.run is a stub — contributions welcome!")
 
     def parse_results(
         self, raw_results: Any, n_subsystems: int, n_cycles: int
     ) -> list[ParityOutcome]:
-        raise NotImplementedError(
-            "CirqAdapter.parse_results is a stub — contributions welcome!"
-        )
+        raise NotImplementedError("CirqAdapter.parse_results is a stub — contributions welcome!")

@@ -1,4 +1,5 @@
 """Tests for qgate.threshold — DynamicThreshold."""
+
 from __future__ import annotations
 
 import pytest
@@ -23,8 +24,12 @@ class TestDynamicThreshold:
 
     def test_enabled_adapts(self):
         cfg = DynamicThresholdConfig(
-            enabled=True, baseline=0.65, z_factor=1.0,
-            window_size=5, min_threshold=0.3, max_threshold=0.95,
+            enabled=True,
+            baseline=0.65,
+            z_factor=1.0,
+            window_size=5,
+            min_threshold=0.3,
+            max_threshold=0.95,
         )
         dt = DynamicThreshold(cfg)
         # First update: only 1 sample → stays at baseline
@@ -37,8 +42,11 @@ class TestDynamicThreshold:
 
     def test_threshold_clamp_min(self):
         cfg = DynamicThresholdConfig(
-            enabled=True, baseline=0.10, z_factor=0.0,
-            min_threshold=0.5, max_threshold=0.9,
+            enabled=True,
+            baseline=0.10,
+            z_factor=0.0,
+            min_threshold=0.5,
+            max_threshold=0.9,
         )
         dt = DynamicThreshold(cfg)
         dt.update(0.20)
@@ -48,8 +56,11 @@ class TestDynamicThreshold:
 
     def test_threshold_clamp_max(self):
         cfg = DynamicThresholdConfig(
-            enabled=True, baseline=0.65, z_factor=10.0,
-            min_threshold=0.3, max_threshold=0.9,
+            enabled=True,
+            baseline=0.65,
+            z_factor=10.0,
+            min_threshold=0.3,
+            max_threshold=0.9,
         )
         dt = DynamicThreshold(cfg)
         dt.update(0.95)

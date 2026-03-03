@@ -1,4 +1,5 @@
 """Tests for qgate.adapters.vqe_adapter — VQETSVFAdapter."""
+
 from __future__ import annotations
 
 import math
@@ -28,8 +29,7 @@ from qgate.scoring import score_batch
 pytest.importorskip("qiskit")
 pytest.importorskip("qiskit_aer")
 
-from qiskit_aer import AerSimulator  # noqa: E402
-
+from qiskit_aer import AerSimulator
 
 # ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -57,7 +57,7 @@ class TestHamiltonianHelpers:
     def test_exact_ground_energy_2_qubits(self):
         # 2-qubit TFIM: H = -J*Z0*Z1 - h*(X0 + X1)
         # For J=1, h=1: exact ground state energy = -sqrt(1+1) ≈ -2.236
-        # (from analytical diagonalisation of 4×4 matrix)
+        # (from analytical diagonalisation of 4x4 matrix)
         e = tfim_exact_ground_energy(2, 1.0, 1.0)
         assert e < -2.0
         assert e == pytest.approx(-2.23606797749979, abs=0.01)
@@ -178,7 +178,9 @@ class TestBuildCircuit:
 
     def test_custom_params(self):
         params = np.random.default_rng(42).uniform(
-            -math.pi, math.pi, size=(2, N_QUBITS, 2),
+            -math.pi,
+            math.pi,
+            size=(2, N_QUBITS, 2),
         )
         adapter = VQETSVFAdapter(
             backend=_ideal_backend(),
@@ -192,7 +194,9 @@ class TestBuildCircuit:
     def test_2d_params_replicated(self):
         """2D params (n_qubits, 2) should be replicated for all layers."""
         params = np.random.default_rng(42).uniform(
-            -math.pi, math.pi, size=(N_QUBITS, 2),
+            -math.pi,
+            math.pi,
+            size=(N_QUBITS, 2),
         )
         adapter = VQETSVFAdapter(
             backend=_ideal_backend(),
