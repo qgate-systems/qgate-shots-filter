@@ -1,0 +1,20 @@
+{
+  "exact_energy": -49.88095416865452,
+  "energy_standard": -0.1308,
+  "energy_tsvf": -0.45757299270072993,
+  "error_standard": 49.75015416865452,
+  "error_tsvf": 49.423381175953786,
+  "improvement_pct": 0.6568281006586675,
+  "depth_original_tsvf": 1403,
+  "depth_transpiled_tsvf": 2290,
+  "depth_ratio_tsvf": 1.6322166785459729,
+  "galton_threshold": 0.8125,
+  "galton_in_warmup": false,
+  "acceptance_probability": 0.1742,
+  "accepted_shots": 1742,
+  "total_shots": 10000,
+  "ancilla_accepted": 4384,
+  "tts": 5.7405281285878305,
+  "mode": "aer",
+  "backend": "aer_simulator"
+}
