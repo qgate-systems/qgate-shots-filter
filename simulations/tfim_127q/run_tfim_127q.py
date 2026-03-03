@@ -711,6 +711,7 @@ def run_full_experiment(
     print("=" * 74)
 
     improvement_dmrg = (err_std_dmrg - err_tsvf_dmrg) / max(err_std_dmrg, 1e-12) * 100
+    cooling_delta = energy_tsvf - energy_std  # Negative = TSVF finds lower (better) energy
     beats_zne = err_tsvf_dmrg < abs(zne_energy - dmrg_energy)
 
     print(f"\n  Problem:              127-qubit TFIM at h/J = {H_FIELD/J_COUPLING:.2f}")
@@ -723,6 +724,7 @@ def run_full_experiment(
     print(f"  │  IBM ZNE (2023):    {zne_energy:.2f}  (|err| = {abs(zne_energy - dmrg_energy):.2f})")
     print(f"  │  Standard VQE:      {energy_std:.4f}  (|err vs DMRG| = {err_std_dmrg:.2f})")
     print(f"  │  TSVF VQE:          {energy_tsvf:.4f}  (|err vs DMRG| = {err_tsvf_dmrg:.2f})")
+    print(f"  │  Cooling Δ:         {cooling_delta:+.4f}  (E_tsvf − E_std; negative = TSVF wins)")
     print(f"  │  TSVF improvement:  {improvement_dmrg:+.1f}% vs standard")
     print(f"  │")
     if beats_zne:
@@ -765,6 +767,7 @@ def run_full_experiment(
         "zne_energy": zne_energy,
         "energy_standard": energy_std,
         "energy_tsvf": energy_tsvf,
+        "cooling_delta": cooling_delta,
         "error_standard_dmrg": err_std_dmrg,
         "error_tsvf_dmrg": err_tsvf_dmrg,
         "improvement_pct": improvement_dmrg,
@@ -852,6 +855,20 @@ def main():
     if args.topology_check_only:
         results = run_topology_check(backend, args.layers, edges)
     else:
+        # ── Cost warning & safety confirmation ──
+        est_seconds = args.shots * 2 / 1000  # rough: ~2ms per shot
+        print(f"\n  ┌─ ⚠  QPU COST WARNING ──────────────────────────────────")
+        print(f"  │  Backend:      {args.backend}")
+        print(f"  │  Shots:        {args.shots:,} × 2 jobs (standard + TSVF)")
+        print(f"  │  Est. QPU:     ~{est_seconds:.0f}s per job")
+        print(f"  │  Est. cost:    $500–$1,500 (depends on queue & plan)")
+        print(f"  │  Heavy-hex:    {len(edges)} edges, {backend.num_qubits} qubits")
+        print(f"  └────────────────────────────────────────────────────────")
+        confirm = input("\n  Type CONFIRM to proceed with QPU execution: ").strip()
+        if confirm != "CONFIRM":
+            print("  Aborted. No QPU credits spent.")
+            return
+
         results = run_full_experiment(
             backend=backend,
             n_layers=args.layers,
