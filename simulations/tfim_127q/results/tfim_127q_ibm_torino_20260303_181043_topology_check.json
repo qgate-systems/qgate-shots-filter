@@ -1,0 +1,14 @@
+{
+  "n_physical_qubits": 133,
+  "n_system_qubits_tsvf": 132,
+  "n_layers": 3,
+  "n_edges_standard": 150,
+  "n_edges_tsvf": 149,
+  "std_depth_original": 119,
+  "std_depth_transpiled": 285,
+  "std_ratio": 2.3949579831932772,
+  "tsvf_depth_original": 1991,
+  "tsvf_depth_transpiled": 49662,
+  "tsvf_ratio": 24.943244600703164,
+  "pass": true
+}

@@ -503,20 +503,33 @@ def run_topology_check(
 
     Builds both standard and TSVF circuits, transpiles them, and reports
     depth and gate counts.
+
+    Note: The TSVF circuit needs one ancilla qubit, so it uses N-1 system
+    qubits + 1 ancilla = N total (where N = backend.num_qubits).
     """
     from qiskit import transpile
 
-    n_qubits = backend.num_qubits
-    print(f"\n  Building standard circuit ({n_qubits} qubits, {n_layers} layers)...")
+    n_physical = backend.num_qubits
+    n_sys_tsvf = n_physical - 1  # Reserve one qubit for ancilla
+
+    # Filter edges to only include system qubits for TSVF
+    tsvf_edges = [(i, j) for i, j in edges if i < n_sys_tsvf and j < n_sys_tsvf]
+
+    print(f"\n  Backend: {n_physical} physical qubits")
+    print(f"  Standard: uses all {n_physical} qubits, {len(edges)} edges")
+    print(f"  TSVF:     uses {n_sys_tsvf} system + 1 ancilla = {n_physical} total, "
+          f"{len(tsvf_edges)} edges")
+
+    print(f"\n  Building standard circuit ({n_physical} qubits, {n_layers} layers)...")
     t0 = time.time()
-    std_circuit = build_heavy_hex_standard_circuit(n_qubits, n_layers, edges)
+    std_circuit = build_heavy_hex_standard_circuit(n_physical, n_layers, edges)
     dt_build_std = time.time() - t0
     print(f"  Built in {dt_build_std:.1f}s — depth={std_circuit.depth()}, "
           f"gates={sum(std_circuit.count_ops().values())}")
 
-    print(f"\n  Building TSVF circuit ({n_qubits} qubits, {n_layers} layers)...")
+    print(f"\n  Building TSVF circuit ({n_sys_tsvf}+1 qubits, {n_layers} layers)...")
     t0 = time.time()
-    tsvf_circuit = build_heavy_hex_tsvf_circuit(n_qubits, n_layers, edges)
+    tsvf_circuit = build_heavy_hex_tsvf_circuit(n_sys_tsvf, n_layers, tsvf_edges)
     dt_build_tsvf = time.time() - t0
     print(f"  Built in {dt_build_tsvf:.1f}s — depth={tsvf_circuit.depth()}, "
           f"gates={sum(tsvf_circuit.count_ops().values())}")
@@ -537,18 +550,23 @@ def run_topology_check(
     ratio_tsvf = tsvf_isa.depth() / max(tsvf_circuit.depth(), 1)
 
     print(f"\n  ┌─ TOPOLOGY CHECK RESULTS ──────────────────────────────")
-    print(f"  │  Heavy-hex edges:   {len(edges)}")
-    print(f"  │  Standard depth:    {std_circuit.depth()} → {std_isa.depth()} ({ratio_std:.1f}×)")
-    print(f"  │  TSVF depth:        {tsvf_circuit.depth()} → {tsvf_isa.depth()} ({ratio_tsvf:.1f}×)")
+    print(f"  │  Physical qubits:  {n_physical}")
+    print(f"  │  TSVF sys qubits:  {n_sys_tsvf} + 1 ancilla")
+    print(f"  │  Std edges:        {len(edges)}")
+    print(f"  │  TSVF edges:       {len(tsvf_edges)}")
+    print(f"  │  Standard depth:   {std_circuit.depth()} → {std_isa.depth()} ({ratio_std:.1f}×)")
+    print(f"  │  TSVF depth:       {tsvf_circuit.depth()} → {tsvf_isa.depth()} ({ratio_tsvf:.1f}×)")
     ok = ratio_tsvf < 50
     status = "✅ PASS" if ok else "⚠  REVIEW — high blow-up"
     print(f"  │  Verdict:           {status}")
     print(f"  └────────────────────────────────────────────────────────")
 
     return {
-        "n_qubits": n_qubits,
+        "n_physical_qubits": n_physical,
+        "n_system_qubits_tsvf": n_sys_tsvf,
         "n_layers": n_layers,
-        "n_edges": len(edges),
+        "n_edges_standard": len(edges),
+        "n_edges_tsvf": len(tsvf_edges),
         "std_depth_original": std_circuit.depth(),
         "std_depth_transpiled": std_isa.depth(),
         "std_ratio": ratio_std,
@@ -572,20 +590,32 @@ def run_full_experiment(
     1. Build & run standard VQE (baseline)
     2. Build & run TSVF VQE with qgate filtering
     3. Compare against DMRG and IBM ZNE benchmarks
+
+    Note: The TSVF circuit reserves one physical qubit for the ancilla,
+    so it uses N-1 system qubits.  The standard VQE uses all N qubits.
+    Energy benchmarks are normalised to the TSVF system size for a fair
+    comparison (DMRG × n_sys_tsvf).
     """
-    n_qubits = backend.num_qubits
+    n_physical = backend.num_qubits
+    n_sys_tsvf = n_physical - 1  # Reserve one qubit for ancilla
+
+    # Filter edges: standard uses all, TSVF excludes ancilla qubit
+    tsvf_edges = [(i, j) for i, j in edges if i < n_sys_tsvf and j < n_sys_tsvf]
+
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     print("\n" + "=" * 74)
-    print("  127-QUBIT TFIM CRITICAL-PHASE EXPERIMENT")
+    print("  UTILITY-SCALE TFIM CRITICAL-PHASE EXPERIMENT")
     print("  H = -J Σ Z_i Z_{i+1}  -  h Σ X_i")
     print(f"  J = {J_COUPLING},  h = {H_FIELD}  (h/J = {H_FIELD/J_COUPLING:.2f} — critical)")
-    print(f"  Qubits: {n_qubits},  Layers: {n_layers},  Shots: {shots:,}")
+    print(f"  Physical qubits: {n_physical}  |  TSVF system: {n_sys_tsvf} + 1 anc")
+    print(f"  Layers: {n_layers},  Shots: {shots:,}")
     print(f"  Backend: {backend.name}")
-    print(f"  Heavy-hex edges: {len(edges)}")
+    print(f"  Std edges: {len(edges)},  TSVF edges: {len(tsvf_edges)}")
     print("=" * 74)
 
-    # ── DMRG benchmark ──
+    # ── DMRG benchmark (normalised to TSVF system size) ──
+    n_qubits = n_sys_tsvf  # Energy comparison uses TSVF system size
     dmrg_energy = DMRG_ENERGY_PER_SITE * n_qubits
     zne_energy = IBM_ZNE_ENERGY_PER_SITE * n_qubits
     print(f"\n  Classical benchmarks:")
@@ -596,8 +626,8 @@ def run_full_experiment(
     # ── Step 1: Build circuits ──
     print(f"\n[1/5] Building circuits...")
     t0 = time.time()
-    std_circuit = build_heavy_hex_standard_circuit(n_qubits, n_layers, edges)
-    tsvf_circuit = build_heavy_hex_tsvf_circuit(n_qubits, n_layers, edges)
+    std_circuit = build_heavy_hex_standard_circuit(n_physical, n_layers, edges)
+    tsvf_circuit = build_heavy_hex_tsvf_circuit(n_sys_tsvf, n_layers, tsvf_edges)
     print(f"       Standard: depth={std_circuit.depth()}, "
           f"gates={sum(std_circuit.count_ops().values())}")
     print(f"       TSVF:     depth={tsvf_circuit.depth()}, "
@@ -608,7 +638,7 @@ def run_full_experiment(
     print(f"\n[2/5] Executing standard VQE — {shots:,} shots on {backend.name}...")
     std_result = run_circuit_on_backend(std_circuit, backend, shots)
     std_counts = extract_counts_from_pub(std_result["pub_result"], std_circuit)
-    energy_std = estimate_energy_from_counts(std_counts, n_qubits, J_COUPLING)
+    energy_std = estimate_energy_from_counts(std_counts, n_physical, J_COUPLING)
     err_std_dmrg = energy_error(energy_std, dmrg_energy)
     err_std_zne = energy_error(energy_std, zne_energy)
     print(f"       E_standard = {energy_std:.4f}")
@@ -714,8 +744,8 @@ def run_full_experiment(
     cooling_delta = energy_tsvf - energy_std  # Negative = TSVF finds lower (better) energy
     beats_zne = err_tsvf_dmrg < abs(zne_energy - dmrg_energy)
 
-    print(f"\n  Problem:              127-qubit TFIM at h/J = {H_FIELD/J_COUPLING:.2f}")
-    print(f"  Backend:              {backend.name} ({backend.num_qubits} qubits)")
+    print(f"\n  Problem:              {n_qubits}-qubit TFIM at h/J = {H_FIELD/J_COUPLING:.2f}")
+    print(f"  Backend:              {backend.name} ({n_physical} physical, {n_sys_tsvf}+1 TSVF)")
     print(f"  Shots:                {shots:,}")
     print(f"  Layers:               {n_layers}")
 
@@ -757,10 +787,12 @@ def run_full_experiment(
     results = {
         "timestamp": timestamp,
         "backend": backend.name,
-        "n_qubits": n_qubits,
+        "n_physical_qubits": n_physical,
+        "n_system_qubits_tsvf": n_sys_tsvf,
         "n_layers": n_layers,
         "shots": shots,
-        "n_edges": len(edges),
+        "n_edges_standard": len(edges),
+        "n_edges_tsvf": len(tsvf_edges),
         "alpha": alpha,
         "target_acceptance": target_acceptance,
         "dmrg_energy": dmrg_energy,
