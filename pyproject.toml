@@ -1,0 +1,16 @@
+[project]
+name = "qgate-trajectory-filter"
+version = "0.5.0"
+description = "Time-Symmetric Trajectory Filtering for NISQ Quantum Hardware — monorepo workspace"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "matplotlib>=3.9.4",
+    "numpy>=2.0.2",
+    "pandas>=2.3.3",
+    "pyarrow>=21.0.0",
+    "pyyaml>=6.0.3",
+    "qutip>=5.0.4",
+    "scipy>=1.13.1",
+    "tqdm>=4.67.1",
+]

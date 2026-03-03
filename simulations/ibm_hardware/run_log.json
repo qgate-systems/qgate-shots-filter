@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-02-16T20:53:20.080175+00:00",
+  "backend": "<IBMBackend('ibm_marrakesh')>",
+  "config": {
+    "N_values": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "W_values": [
+      2,
+      4
+    ],
+    "D_values": [
+      2,
+      4,
+      8
+    ],
+    "k_values": [
+      0.8,
+      0.9
+    ],
+    "alpha_values": [
+      0.3,
+      0.7
+    ],
+    "threshold_combined": 0.65,
+    "shots": 5000,
+    "theta_batch": 0.0,
+    "probe_shots": 1000
+  },
+  "total_circuit_configs": 24,
+  "total_rows": 120,
+  "elapsed_seconds": 351.8572759628296
+}

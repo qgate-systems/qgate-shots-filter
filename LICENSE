@@ -1,0 +1,48 @@
+QGATE SOURCE AVAILABLE EVALUATION LICENSE (v1.2)
+Copyright (c) 2024–2026, Ran Buchnik. All rights reserved.
+
+1. DEFINITIONS, PURPOSE & VISION
+"The Software" refers to the qgate source code, documentation, simulation data, examples, and all associated files distributed in this repository.
+The Software is released under this Source Available License to foster academic reproducibility, peer review, and transparent benchmarking of time-symmetric trajectory filtering on Noisy Intermediate-Scale Quantum (NISQ) hardware.
+
+2. PERMITTED USES (COPYRIGHT GRANT)
+You are granted a worldwide, royalty-free, non-exclusive, non-transferable copyright license (without the right to sublicense) to use, copy, modify, and redistribute the Software strictly for the following purposes (Note: Patent rights are governed separately under Section 5):
+
+Academic & Scientific Research: Publishing papers, running experiments, and open benchmarking of quantum hardware.
+
+Internal Corporate Evaluation: Engineers and researchers at commercial entities may use the Software internally to evaluate its performance. This explicitly includes the right to execute the Software on third-party cloud hardware (e.g., IBM Quantum, AWS Braket) strictly for internal R&D, and the right to redistribute the Software internally within the same legal entity.
+
+3. COMMERCIAL USE RESTRICTIONS
+To sustainably fund the ongoing R&D of this architecture, commercial deployment requires a separate commercial license. You may not use this Software or its derivatives (including but not limited to API wrappers, integrated workflows, and modified binaries) for:
+
+Cloud & Platform Integration: Integrating the Software into commercial Quantum-as-a-Service (QaaS) platforms, cloud APIs, or proprietary hardware control stacks offered to third parties.
+
+Commercial Software Products: Bundling the Software into paid enterprise error-suppression, quantum middleware products, or proprietary benchmarking services.
+
+4. REDISTRIBUTION & MODIFICATION
+If you redistribute the Software or any modifications/derivatives thereof, you must:
+
+Include a copy of this License.
+
+Retain all copyright, patent, and attribution notices present in the original Software.
+
+Distribute any modifications under this exact same License.
+
+5. PATENT RIGHTS & INTELLECTUAL PROPERTY
+This Software implements methods covered by pending patent applications, including U.S. App. Nos. 63/983,831 and 63/989,632, Israeli App. No. 326915, and any associated continuations, non-provisional filings, or foreign counterparts.
+
+For the Permitted Uses outlined in Section 2, the author grants a non-exclusive, non-transferable, royalty-free patent license strictly limited to non-commercial research and internal corporate evaluation of the Software.
+
+For the Commercial Uses outlined in Section 3, no express or implied patent license is granted.
+
+6. TERMINATION
+Any use of the Software that violates the commercial restrictions in Section 3, or fails to comply with the redistribution conditions in Section 4, will result in the automatic and immediate termination of this License, including the revocation of any patent grants provided herein. Furthermore, the author reserves the right to explicitly terminate this License at any time for any violation of its terms.
+
+7. COMMERCIAL LICENSING & ACQUISITION
+If you wish to integrate the Software into a commercial hardware stack, enterprise software environment, or inquire about Intellectual Property acquisition, please contact the IP holder directly to negotiate a commercial license. The author may offer alternative licensing terms (including commercial execution rights or dual-licensing) upon request.
+
+8. LIMITATION OF LIABILITY & INDEMNIFICATION
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM THE USE OF THE SOFTWARE. Furthermore, the author makes no warranty that the Software does not infringe the intellectual property rights of third parties, and users agree to hold the author harmless from any such claims.
+
+9. GENERAL PROVISIONS
+If any provision of this License is held to be unenforceable, the remaining provisions shall continue in full force and effect. This License shall be governed by the laws of the State of Israel, without regard to conflict of law principles.

@@ -1,0 +1,39 @@
+{
+  "description": "Follow-up sweep with tighter thresholds and extended system sizes for second provisional patent",
+  "version": "2.0",
+  
+  "system_sizes": [1, 2, 4, 8, 16, 32],
+  "system_sizes_extended": [1, 2, 4, 8, 16, 32, 64],
+  
+  "gamma_values": [0.5, 1.0, 2.0, 5.0],
+  
+  "thresholds": [0.65, 0.68, 0.70, 0.72],
+  
+  "windows": [0.5, 1.0, 2.0],
+  
+  "acceptance_mode": "window_max",
+  
+  "adaptive_trials": {
+    "enabled": true,
+    "initial_trials": 200,
+    "max_trials": 3000,
+    "low_acceptance_threshold": 0.02,
+    "step_multiplier": 5
+  },
+  
+  "simulation": {
+    "drive_amp": 1.0,
+    "drive_freq": 1.0,
+    "t_max": 12.0,
+    "n_steps": 500
+  },
+  
+  "seed": 42,
+  
+  "output": {
+    "base_dir": "runs",
+    "figures_subdir": "figures"
+  },
+  
+  "notes": "Tighter thresholds (0.8-0.95) make hierarchical conditioning non-trivial. Extended N to 32 (optionally 64) for stronger scaling evidence."
+}

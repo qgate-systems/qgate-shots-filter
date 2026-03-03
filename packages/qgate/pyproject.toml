@@ -1,0 +1,120 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qgate"
+version = "0.5.0"
+description = "Quantum Trajectory Filter — runtime post-selection conditioning for quantum circuits"
+readme = "README.md"
+license = { text = "LicenseRef-QGate-Source-Available-v1.2" }
+requires-python = ">=3.9"
+authors = [
+    { name = "Ran Buchnik", email = "ranbuch@gmail.com" },
+]
+keywords = [
+    "quantum", "quantum-computing", "qiskit", "quantum-error-mitigation",
+    "tsvf", "nisq", "error-suppression", "post-selection", "conditioning",
+    "qec", "trajectory-filter",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: Other/Proprietary License",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    "numpy>=1.24",
+    "pydantic>=2.0",
+    "typer>=0.9",
+]
+
+[project.optional-dependencies]
+csv = ["pandas>=1.5"]
+qutip = ["qutip>=5.0", "scipy>=1.10"]
+qiskit = ["qiskit>=1.0", "qiskit-aer>=0.13", "qiskit-ibm-runtime>=0.20"]
+cirq = ["cirq-core>=1.3"]
+pennylane = ["pennylane>=0.33"]
+plotting = ["matplotlib>=3.7"]
+parquet = ["pandas>=1.5", "pyarrow>=14.0"]
+all = ["qgate[csv,qutip,qiskit,cirq,pennylane,plotting,parquet]"]
+dev = [
+    "qgate[all]",
+    "pytest>=7.0",
+    "pytest-cov",
+    "ruff>=0.4",
+    "mypy>=1.8",
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.24",
+]
+
+[project.scripts]
+qgate = "qgate.cli:app"
+
+[project.entry-points."qgate.adapters"]
+mock = "qgate.adapters.base:MockAdapter"
+qiskit = "qgate.adapters.qiskit_adapter:QiskitAdapter"
+grover_tsvf = "qgate.adapters.grover_adapter:GroverTSVFAdapter"
+qaoa_tsvf = "qgate.adapters.qaoa_adapter:QAOATSVFAdapter"
+vqe_tsvf = "qgate.adapters.vqe_adapter:VQETSVFAdapter"
+qpe_tsvf = "qgate.adapters.qpe_adapter:QPETSVFAdapter"
+cirq = "qgate.adapters.cirq_adapter:CirqAdapter"
+pennylane = "qgate.adapters.pennylane_adapter:PennyLaneAdapter"
+
+[project.urls]
+Homepage = "https://pypi.org/project/qgate/"
+Repository = "https://github.com/ranbuch/qgate-trajectory-filter"
+Documentation = "https://ranbuch.github.io/qgate-trajectory-filter"
+Changelog = "https://github.com/ranbuch/qgate-trajectory-filter/blob/main/packages/qgate/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/ranbuch/qgate-trajectory-filter/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qgate"]
+
+# ── Ruff ──────────────────────────────────────────────────────────────────
+[tool.ruff]
+target-version = "py39"
+line-length = 99
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
+ignore = [
+    "E501",    # line length handled by formatter
+    "RUF001",  # ambiguous unicode in strings  (math notation: –, ≥)
+    "RUF002",  # ambiguous unicode in docstrings (math notation: α, −, ×)
+    "B008",    # function call in default arg  (standard typer pattern)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Pydantic/typer evaluate field annotations at runtime — must use typing.Optional/List on 3.9
+"src/qgate/config.py" = ["UP006", "UP007", "UP035", "UP045"]
+"src/qgate/cli.py" = ["UP007", "UP035", "UP045"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["qgate"]
+
+# ── Mypy ──────────────────────────────────────────────────────────────────
+[tool.mypy]
+python_version = "3.9"
+strict = false
+warn_return_any = true
+warn_unused_configs = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["qiskit.*", "qiskit_aer.*", "qiskit_ibm_runtime.*", "cirq.*", "pennylane.*", "qutip.*"]
+ignore_missing_imports = true
+
+# ── Pytest ────────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"

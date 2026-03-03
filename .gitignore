@@ -1,0 +1,58 @@
+# ── Python ────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[oc]
+*.pyo
+build/
+dist/
+wheels/
+*.egg-info/
+*.egg
+*.whl
+
+# ── Virtual environments ──────────────────────────────────────────────────
+.venv/
+venv/
+.conda/
+.pixi/
+
+# ── Secrets & local config ────────────────────────────────────────────────
+.secrets.json
+.env
+.env.*
+.pypirc
+*.pem
+*.key
+
+# ── IDE / editor ──────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── macOS ─────────────────────────────────────────────────────────────────
+.DS_Store
+._*
+
+# ── Tool caches ───────────────────────────────────────────────────────────
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ── Experiment run data (large, reproducible locally) ─────────────────────
+runs/
+sweeps/
+simulations/*/results_*/
+simulations/qutip_sims/runs/
+simulations/ibm_hardware/galton_experiment/
+
+# ── Build artifacts ───────────────────────────────────────────────────────
+_placeholder/
+site/
+
+# ── Misc ──────────────────────────────────────────────────────────────────
+*.log
+uv.lock

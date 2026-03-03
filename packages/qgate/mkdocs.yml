@@ -1,0 +1,135 @@
+site_name: qgate
+site_description: >-
+  qgate — hardware-agnostic quantum error suppression middleware for NISQ devices.
+  Runtime trajectory filtering via Bell-pair post-selection conditioning, score fusion,
+  and Galton adaptive thresholding. Validated on IBM Quantum hardware with up to 7.3×
+  fidelity improvement. Patent pending.
+site_url: https://ranbuch.github.io/qgate-trajectory-filter
+site_author: Ran Buchnik
+repo_url: https://github.com/ranbuch/qgate-trajectory-filter
+repo_name: ranbuch/qgate-trajectory-filter
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - navigation.expand
+    - content.code.copy
+    - content.code.annotate
+    - search.highlight
+    - search.suggest
+    - toc.follow
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            show_symbol_type_heading: true
+            members_order: source
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.critic
+  - toc:
+      permalink: true
+  - def_list
+  - footnotes
+  - tables
+
+extra_javascript:
+  # NOTE: polyfill.io removed — compromised supply chain (2024).
+  # MathJax 3 does not require a polyfill for modern browsers.
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ranbuch/qgate-trajectory-filter
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/qgate/
+  # Uncomment and add your Google Analytics measurement ID when ready:
+  # analytics:
+  #   provider: google
+  #   property: G-XXXXXXXXXX
+  generator: false
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+  - Architecture:
+    - Overview & Methodology: architecture.md
+  - Concepts:
+    - How It Works: concepts/how-it-works.md
+    - Conditioning Strategies: concepts/conditioning.md
+    - Fusion Scoring: concepts/fusion-scoring.md
+    - Dynamic Thresholding: concepts/dynamic-thresholding.md
+  - Hardware Experiments:
+    - experiments/index.md
+    - Grover TSVF: experiments/grover.md
+    - QAOA TSVF: experiments/qaoa.md
+    - VQE TSVF: experiments/vqe.md
+    - QPE TSVF: experiments/qpe.md
+  - Adapters:
+    - Overview: adapters/overview.md
+    - Qiskit: adapters/qiskit.md
+    - Cirq: adapters/cirq.md
+    - PennyLane: adapters/pennylane.md
+  - CLI Reference: cli.md
+  - API Reference: api.md
+  - Contributing: contributing.md
+  - License: license.md
+
+copyright: >-
+  © 2024–2026 Ran Buchnik — US Patent App. Nos. 63/983,831 & 63/989,632 |
+  Israeli Patent App. No. 326915. Patent pending.
+  QGATE Source Available Evaluation License v1.2 — commercial deployment requires a separate license.

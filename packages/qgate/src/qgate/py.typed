@@ -1,0 +1,3 @@
+"""
+py.typed marker — indicates this package supports PEP 561 type checking.
+"""

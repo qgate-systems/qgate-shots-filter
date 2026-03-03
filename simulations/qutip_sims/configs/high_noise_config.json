@@ -1,0 +1,36 @@
+{
+  "description": "High-noise regime configuration for patent evidence collection",
+  "version": "1.0",
+  
+  "system_sizes": [1, 2, 4, 8, 16],
+  
+  "gamma_values": [0.5, 1.0, 2.0, 5.0, 10.0],
+  
+  "thresholds": [0.6, 0.7, 0.8],
+  
+  "windows": [0.5, 1.0],
+  
+  "acceptance_mode": "window_max",
+  
+  "adaptive_trials": {
+    "enabled": true,
+    "initial_trials": 200,
+    "max_trials": 2000,
+    "low_acceptance_threshold": 0.02,
+    "step_multiplier": 5
+  },
+  
+  "simulation": {
+    "drive_amp": 1.0,
+    "drive_freq": 1.0,
+    "t_max": 12.0,
+    "n_steps": 500
+  },
+  
+  "seed": 42,
+  
+  "output": {
+    "base_dir": "runs",
+    "figures_subdir": "figures"
+  }
+}
