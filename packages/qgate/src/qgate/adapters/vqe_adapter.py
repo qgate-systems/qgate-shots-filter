@@ -39,6 +39,8 @@ import math
 from typing import Any
 
 import numpy as np
+import scipy.sparse as sp
+import scipy.sparse.linalg as spla
 
 from qgate.adapters.base import BaseAdapter
 from qgate.conditioning import ParityOutcome
@@ -58,49 +60,61 @@ except ImportError:  # pragma: no cover
 # ═══════════════════════════════════════════════════════════════════════════
 
 
+def _sparse_kron_chain(ops: list[sp.spmatrix]) -> sp.spmatrix:
+    """Kronecker product of a list of sparse matrices."""
+    result = ops[0]
+    for op in ops[1:]:
+        result = sp.kron(result, op, format="csc")
+    return result
+
+
 def tfim_exact_ground_energy(
     n_qubits: int,
     j_coupling: float = 1.0,
     h_field: float = 1.0,
 ) -> float:
-    """Compute exact ground-state energy of the 1D TFIM by diagonalisation.
+    """Compute exact ground-state energy of the 1D TFIM.
 
     H = −J Σ_{i} Z_i Z_{i+1}  −  h Σ_{i} X_i
 
-    Only feasible for small n_qubits (≤ ~16).
+    Uses **sparse** Hamiltonian construction + Lanczos (ARPACK) for the
+    ground state, so it scales comfortably to 20+ qubits on a laptop.
+
+    For very small systems (≤ 12 qubits) a dense fallback is used because
+    ARPACK can occasionally be slower for tiny matrices.
 
     Returns:
         The minimum eigenvalue of H.
     """
     dim = 2**n_qubits
 
-    # Build Pauli matrices
-    eye2 = np.eye(2)
-    pauli_z = np.array([[1, 0], [0, -1]], dtype=complex)
-    pauli_x = np.array([[0, 1], [1, 0]], dtype=complex)
+    # Sparse Pauli matrices
+    eye2 = sp.eye(2, format="csc")
+    pauli_z = sp.diags([1.0, -1.0], format="csc")
+    pauli_x = sp.csc_matrix(np.array([[0.0, 1.0], [1.0, 0.0]]))
 
-    def _kron_chain(ops: list[np.ndarray]) -> np.ndarray:
-        result = ops[0]
-        for op in ops[1:]:
-            result = np.kron(result, op)
-        return result
-
-    ham = np.zeros((dim, dim), dtype=complex)
+    ham = sp.csc_matrix((dim, dim), dtype=np.float64)
 
     # ZZ coupling: -J Sum Z_i Z_{i+1}
     for i in range(n_qubits - 1):
-        ops = [eye2] * n_qubits
+        ops: list[sp.spmatrix] = [eye2] * n_qubits
         ops[i] = pauli_z
         ops[i + 1] = pauli_z
-        ham -= j_coupling * _kron_chain(ops)
+        ham = ham - j_coupling * _sparse_kron_chain(ops)
 
     # Transverse field: -h Sum X_i
     for i in range(n_qubits):
         ops = [eye2] * n_qubits
         ops[i] = pauli_x
-        ham -= h_field * _kron_chain(ops)
+        ham = ham - h_field * _sparse_kron_chain(ops)
 
-    eigenvalues = np.linalg.eigvalsh(ham.real)
+    # For small systems, dense is fine and avoids ARPACK edge cases
+    if n_qubits <= 12:
+        eigenvalues = np.linalg.eigvalsh(ham.toarray())
+        return float(eigenvalues[0])
+
+    # Lanczos / ARPACK for largest systems — find 1 smallest eigenvalue
+    eigenvalues, _ = spla.eigsh(ham, k=1, which="SA")
     return float(eigenvalues[0])
 
 
