@@ -19,9 +19,8 @@ Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 from __future__ import annotations
 
 import sys
-from typing import Any
-
 from importlib.metadata import entry_points
+from typing import Any
 
 _EP_GROUP = "qgate.adapters"
 
