@@ -7,12 +7,16 @@ measurable MSE reduction compared to a standard (unfiltered) SamplerV2
 on a physically meaningful problem: the 1D Transverse-Field Ising Model.
 
 Protocol:
-  1. Build a TFIM VQE-style circuit (8 qubits, 3 ansatz layers).
+  1. Build a parameterised TFIM VQE ansatz (8 qubits, 3 layers).
   2. Set up a noisy AerSimulator with Heron-class noise model.
-  3. Baseline run:  standard SamplerV2 → raw energy estimate.
-  4. Qgate OS run:  QgateSampler (same circuit, same backend) → filtered energy.
-  5. Repeat for N_TRIALS independent seeds → per-trial MSE.
-  6. Report comparative statistics and assert MSE_qgate < MSE_baseline.
+  3. **Warm-up:** Run a quick VQE pre-optimisation (~20 iterations via
+     EstimatorV2 + COBYLA) to find a partially-optimised θ* that gives
+     the circuit enough correlation structure for the Galton filter to
+     discriminate on.
+  4. **Showdown:** Using θ*, run 10 independent measurement trials:
+       - Baseline: standard SamplerV2 → raw energy estimate.
+       - Qgate OS: QgateSampler → filtered energy estimate.
+  5. Report comparative statistics and assert MSE_qgate < MSE_baseline.
 
 **NOTICE — PRE-PATENT PROPRIETARY CODE**
 Do NOT distribute, publish, or push to any public repository.
@@ -48,6 +52,8 @@ H_FIELD = 1.0
 SHOTS = 100_000
 N_TRIALS = 10         # independent random seeds for statistical power
 SEED_BASE = 42
+VQE_MAXITER = 30      # pre-optimisation iterations (enough for ZZ structure)
+VQE_OPT_SHOTS = 4096  # shots per EstimatorV2 evaluation during warm-up
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -97,45 +103,58 @@ def build_heron_noisy_backend() -> Any:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# TFIM circuit builder
+# TFIM circuit builder (parameterised)
 # ═══════════════════════════════════════════════════════════════════════════
 
-def build_tfim_vqe_circuit(
+def _num_params(n_qubits: int, n_layers: int) -> int:
+    """Total number of variational parameters: 2 per qubit per layer."""
+    return 2 * n_qubits * n_layers
+
+
+def build_tfim_ansatz(
     n_qubits: int,
     n_layers: int,
-    seed: int = 42,
 ) -> Any:
-    """Build a hardware-efficient VQE ansatz circuit for the 1D TFIM.
+    """Build a parameterised HW-efficient ansatz for the 1D TFIM.
 
     Architecture:
-      |+⟩^n → [Ry(θ) Rz(φ) per qubit + CNOT ladder] × n_layers → measure all
+      |+⟩^n → [Ry(θ_i) Rz(φ_i) per qubit + CNOT ladder] × n_layers
 
-    The parameters are seeded randomly — this simulates a snapshot of a
-    VQE optimisation loop at some intermediate parameter vector.
+    Returns a QuantumCircuit with unbound ParameterVector entries.
+    No measurements are attached — the caller adds measure_all() for
+    sampling or passes the bare ansatz to EstimatorV2.
     """
     from qiskit import QuantumCircuit
+    from qiskit.circuit import ParameterVector
 
-    rng = np.random.default_rng(seed)
+    n_params = _num_params(n_qubits, n_layers)
+    theta = ParameterVector("θ", n_params)
+
     qc = QuantumCircuit(n_qubits, name=f"TFIM_{n_qubits}q_d{n_layers}")
 
     # Initial state: |+⟩^n (good starting point for TFIM with h > 0)
     for q in range(n_qubits):
         qc.h(q)
 
-    # Hardware-efficient ansatz layers
-    for layer in range(n_layers):
-        # Parameterised rotations
+    idx = 0
+    for _layer in range(n_layers):
         for q in range(n_qubits):
-            qc.ry(float(rng.uniform(-math.pi, math.pi)), q)
-            qc.rz(float(rng.uniform(-math.pi, math.pi)), q)
+            qc.ry(theta[idx], q)
+            qc.rz(theta[idx + 1], q)
+            idx += 2
         # CNOT entangling ladder (linear nearest-neighbour)
         for q in range(n_qubits - 1):
             qc.cx(q, q + 1)
         qc.barrier()
 
-    # Measure all system qubits
-    qc.measure_all()
     return qc
+
+
+def bind_and_measure(ansatz: Any, theta_vals: np.ndarray) -> Any:
+    """Bind parameter values to the ansatz, add measure_all, return circuit."""
+    bound = ansatz.assign_parameters(dict(zip(ansatz.parameters, theta_vals)))
+    bound.measure_all()
+    return bound
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -150,6 +169,148 @@ def compute_exact_ground_energy(
     """Exact TFIM ground-state energy via sparse diagonalisation."""
     from qgate.adapters.vqe_adapter import tfim_exact_ground_energy
     return tfim_exact_ground_energy(n_qubits, j_coupling, h_field)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TFIM Hamiltonian as SparsePauliOp (for EstimatorV2)
+# ═══════════════════════════════════════════════════════════════════════════
+
+def build_tfim_hamiltonian(
+    n_qubits: int,
+    j_coupling: float = 1.0,
+    h_field: float = 1.0,
+) -> Any:
+    """Build the 1D TFIM Hamiltonian as a Qiskit SparsePauliOp.
+
+    H = −J Σ_{i} Z_i Z_{i+1}  −  h Σ_{i} X_i
+
+    Returns:
+        SparsePauliOp suitable for EstimatorV2.
+    """
+    from qiskit.quantum_info import SparsePauliOp
+
+    pauli_terms: list[tuple[str, float]] = []
+
+    # ZZ coupling: -J Z_i Z_{i+1}
+    for i in range(n_qubits - 1):
+        label = ["I"] * n_qubits
+        label[i] = "Z"
+        label[i + 1] = "Z"
+        # SparsePauliOp uses little-endian (qubit 0 = rightmost)
+        pauli_terms.append(("".join(reversed(label)), -j_coupling))
+
+    # Transverse field: -h X_i
+    for i in range(n_qubits):
+        label = ["I"] * n_qubits
+        label[i] = "X"
+        pauli_terms.append(("".join(reversed(label)), -h_field))
+
+    return SparsePauliOp.from_list(pauli_terms).simplify()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# VQE Pre-optimisation (the warm-up)
+# ═══════════════════════════════════════════════════════════════════════════
+
+def find_partial_optimum(
+    backend: Any,
+    n_qubits: int = N_QUBITS,
+    n_layers: int = N_LAYERS,
+    maxiter: int = VQE_MAXITER,
+    estimator_shots: int = VQE_OPT_SHOTS,
+) -> tuple[np.ndarray, float]:
+    """Run a quick VQE warm-up to find a partially-optimised θ*.
+
+    Optimises the **ZZ-only** part of the TFIM Hamiltonian:
+      H_ZZ = −J Σ_{i} Z_i Z_{i+1}
+    because that is the observable we can estimate from computational-
+    basis measurement counts.  We want θ* that produces strong nearest-
+    neighbour spin correlations, giving the Galton probe meaningful
+    alignment signal to filter on.
+
+    Uses EstimatorV2 + COBYLA for *maxiter* iterations on the noisy
+    backend.
+
+    Returns:
+        (opt_theta, final_zz_energy)
+    """
+    from scipy.optimize import minimize
+    from qiskit_ibm_runtime import EstimatorV2
+    from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
+    from qiskit.quantum_info import SparsePauliOp
+
+    ansatz = build_tfim_ansatz(n_qubits, n_layers)
+    n_params = _num_params(n_qubits, n_layers)
+
+    # Build ZZ-only Hamiltonian (what we actually measure from bitstrings)
+    zz_terms: list[tuple[str, float]] = []
+    for i in range(n_qubits - 1):
+        label = ["I"] * n_qubits
+        label[i] = "Z"
+        label[i + 1] = "Z"
+        zz_terms.append(("".join(reversed(label)), -J_COUPLING))
+    hamiltonian_zz = SparsePauliOp.from_list(zz_terms).simplify()
+
+    # Minimum possible ZZ energy = -(n-1)*J (all spins aligned)
+    min_zz = -(n_qubits - 1) * J_COUPLING
+
+    # Transpile the parameterised ansatz once for the backend
+    pm = generate_preset_pass_manager(backend=backend, optimization_level=1)
+    isa_ansatz = pm.run(ansatz)
+    isa_hamiltonian = hamiltonian_zz.apply_layout(isa_ansatz.layout)
+
+    estimator = EstimatorV2(mode=backend)
+
+    eval_count = 0
+    best_energy = 0.0
+    best_theta = None
+
+    def cost_fn(theta: np.ndarray) -> float:
+        nonlocal eval_count, best_energy, best_theta
+        eval_count += 1
+        pub = (isa_ansatz, isa_hamiltonian, theta)
+        job = estimator.run([pub], precision=0.05)
+        result = job.result()
+        energy = float(result[0].data.evs)
+        if energy < best_energy:
+            best_energy = energy
+            best_theta = theta.copy()
+        if eval_count <= 5 or eval_count % 5 == 0:
+            print(f"    VQE iter {eval_count:3d}: E_ZZ = {energy:+.4f}"
+                  f"  (best: {best_energy:+.4f},"
+                  f" {best_energy / min_zz:.0%} of min)")
+        return energy
+
+    # Initial guess: Ry = −π/2 on every qubit produces |0⟩^n after H init.
+    # The CNOT ladder then entangles these, yielding ZZ ≈ −(n−1).
+    # We add small noise so COBYLA can explore the local basin.
+    rng = np.random.default_rng(SEED_BASE)
+    x0 = np.zeros(n_params)
+    for layer in range(n_layers):
+        for q in range(n_qubits):
+            idx = 2 * (layer * n_qubits + q)
+            x0[idx] = -math.pi / 2 + rng.uniform(-0.1, 0.1)  # Ry ≈ −π/2
+            x0[idx + 1] = rng.uniform(-0.1, 0.1)              # Rz ≈ 0
+
+    print(f"\n  ── VQE Warm-up: COBYLA, {maxiter} iterations ──")
+    print(f"     Ansatz: {n_qubits}q × {n_layers} layers = {n_params} params")
+    print(f"     Target: ZZ-only Hamiltonian (min = {min_zz:.1f})")
+
+    minimize(
+        cost_fn,
+        x0,
+        method="COBYLA",
+        options={"maxiter": maxiter, "rhobeg": 0.5},
+    )
+
+    # Use the best θ found across all evaluations
+    opt_theta = best_theta if best_theta is not None else x0
+    final_energy = best_energy
+    print(f"  ── Warm-up done: E*_ZZ = {final_energy:+.4f} "
+          f"({eval_count} evaluations,"
+          f" {final_energy / min_zz:.0%} of min ZZ) ──\n")
+
+    return opt_theta, final_energy
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -202,8 +363,8 @@ def energy_from_bitarray(
 
 @dataclass
 class TrialResult:
-    """Results from a single trial (one circuit seed)."""
-    seed: int
+    """Results from a single trial."""
+    trial_id: int
     raw_energy: float
     raw_variance: float
     raw_shots: int
@@ -240,22 +401,23 @@ class TrialResult:
 
 def run_single_trial(
     backend: Any,
-    circuit_seed: int,
+    ansatz: Any,
+    opt_theta: np.ndarray,
     shots: int,
     exact_energy: float,
     dry_run: bool = False,
 ) -> TrialResult:
     """Run one trial: baseline SamplerV2 vs QgateSampler, same circuit.
 
-    Both samplers use the SAME backend and the SAME circuit. The only
-    difference is that QgateSampler transparently injects probes and
-    applies Galton filtering before returning the result.
+    Both samplers use the SAME backend and the SAME bound circuit. The
+    only difference is that QgateSampler transparently injects probes
+    and applies Galton filtering before returning the result.
     """
     from qiskit_ibm_runtime import SamplerV2
     from qgate.sampler import QgateSampler, SamplerConfig
 
-    # --- Build the circuit ---
-    qc = build_tfim_vqe_circuit(N_QUBITS, N_LAYERS, seed=circuit_seed)
+    # --- Bind parameters and add measurements ---
+    qc = bind_and_measure(ansatz, opt_theta)
 
     if dry_run:
         shots = min(shots, 1024)
@@ -297,7 +459,7 @@ def run_single_trial(
     acceptance_rate = filter_meta.get("acceptance_rate", 0.0)
 
     return TrialResult(
-        seed=circuit_seed,
+        trial_id=0,  # updated per trial in run_experiment
         raw_energy=raw_energy,
         raw_variance=raw_var,
         raw_shots=raw_n,
@@ -333,33 +495,50 @@ def run_experiment(
 
     exact_e = compute_exact_ground_energy(N_QUBITS, J_COUPLING, H_FIELD)
     print(f"  Exact GS: {exact_e:.6f}")
-    print()
 
     backend = build_heron_noisy_backend()
     print("  Backend ready: AerSimulator (Heron noise)")
 
-    # --- Run trials ---
+    # --- Step 1: VQE Warm-up to find partially-optimised θ* ---
+    vqe_iter = 15 if dry_run else VQE_MAXITER
+    opt_theta, warmup_energy = find_partial_optimum(
+        backend=backend,
+        n_qubits=N_QUBITS,
+        n_layers=N_LAYERS,
+        maxiter=vqe_iter,
+        estimator_shots=VQE_OPT_SHOTS,
+    )
+    print(f"  Warm-up E_ZZ: {warmup_energy:+.4f}  (min ZZ: {-(N_QUBITS-1)*J_COUPLING:.1f},"
+          f" exact GS: {exact_e:.4f})")
+    print(f"  ZZ ratio:     {warmup_energy / (-(N_QUBITS-1)*J_COUPLING):.0%} of minimum ZZ energy")
+
+    # --- Step 2: Build the parameterised ansatz (shared across trials) ---
+    ansatz = build_tfim_ansatz(N_QUBITS, N_LAYERS)
+
+    # --- Step 3: Run validation trials ---
+    print(f"\n  ── Showdown: {n_trials} trials ──")
     results: list[TrialResult] = []
     t0 = time.perf_counter()
 
     for trial in range(n_trials):
-        seed = SEED_BASE + trial * 137  # well-separated seeds
         t_trial = time.perf_counter()
 
         result = run_single_trial(
             backend=backend,
-            circuit_seed=seed,
+            ansatz=ansatz,
+            opt_theta=opt_theta,
             shots=shots,
             exact_energy=exact_e,
             dry_run=dry_run,
         )
+        # Tag with trial number
+        result.trial_id = trial + 1
         results.append(result)
 
         dt = time.perf_counter() - t_trial
         sign = "+" if result.mse_reduction_pct > 0 else ""
         print(
-            f"  Trial {trial + 1:2d}/{n_trials} "
-            f"(seed={seed:5d}) | "
+            f"  Trial {trial + 1:2d}/{n_trials} | "
             f"Raw E={result.raw_energy:+.4f}  "
             f"QG E={result.qgate_energy:+.4f}  "
             f"MSE↓ {sign}{result.mse_reduction_pct:.1f}%  "
@@ -441,10 +620,10 @@ def print_report(results: list[TrialResult]) -> bool:
     print()
     print("  Per-trial breakdown:")
     print("  ─────────────────────────────────────────────────────────────────")
-    print("  Trial  Seed   Raw Energy   QG Energy    Raw MSE     QG MSE   MSE↓%")
-    for i, r in enumerate(results):
+    print("  Trial  Raw Energy   QG Energy    Raw MSE     QG MSE   MSE↓%")
+    for r in results:
         print(
-            f"  {i + 1:5d}  {r.seed:5d}  {r.raw_energy:+10.4f}  {r.qgate_energy:+10.4f}"
+            f"  {r.trial_id:5d}  {r.raw_energy:+10.4f}  {r.qgate_energy:+10.4f}"
             f"  {r.raw_mse:10.4f}  {r.qgate_mse:10.4f}  {r.mse_reduction_pct:+6.1f}%"
         )
 
