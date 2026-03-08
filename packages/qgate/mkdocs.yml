@@ -126,6 +126,8 @@ nav:
     - Qiskit: adapters/qiskit.md
     - Cirq: adapters/cirq.md
     - PennyLane: adapters/pennylane.md
+  - Middleware:
+    - QgateSampler: middleware/qgate-sampler.md
   - CLI Reference: cli.md
   - API Reference: api.md
   - Contributing: contributing.md

@@ -231,6 +231,80 @@ pip install qgate[all]         # Everything
 
 ---
 
+## QgateSampler — Drop-in SamplerV2 Middleware
+
+`QgateSampler` is a **transparent drop-in replacement** for Qiskit's `SamplerV2`.
+Wrap any existing sampler and every `run()` call is automatically enhanced with
+probe injection, Galton-filtered post-selection, and clean result reconstruction —
+**zero changes to your circuit code**.
+
+```python
+from qiskit_ibm_runtime import SamplerV2
+from qgate import QgateSampler, SamplerConfig
+
+# ── Before: standard IBM sampler ───────────────────────────────────
+# sampler = SamplerV2(mode=backend)
+# result  = sampler.run([pub])
+
+# ── After: one-line swap ───────────────────────────────────────────
+sampler = QgateSampler(
+    inner=SamplerV2(mode=backend),
+    config=SamplerConfig(
+        probe_ry_angle=0.25,       # controlled-RY probe strength
+        galton_quantile=0.75,      # keep top-25% fidelity tail
+        galton_window=64,          # adaptive threshold window
+    ),
+)
+result = sampler.run([pub])        # ← same API, filtered results
+counts = result[0].data.meas.get_counts()
+```
+
+### What happens under the hood
+
+1. **Probe injection** — adds a lightweight ancilla qubit + controlled-RY gates
+   on nearest-neighbour pairs (zero user-visible overhead)
+2. **Inner execution** — delegates to the wrapped `SamplerV2` (simulator or real hardware)
+3. **Galton filtering** — scores each shot by probe outcome, applies adaptive
+   quantile thresholding, keeps only the high-fidelity tail
+4. **Result reconstruction** — strips probe bits and returns a standard
+   `PrimitiveResult` / `PubResult` / `BitArray` — fully compatible with
+   downstream Qiskit code
+
+### Configuration reference
+
+| Parameter | Default | Description |
+|---|---|---|
+| `probe_ry_angle` | `0.25` | Controlled-RY rotation (radians); higher = stronger probe signal |
+| `galton_quantile` | `0.75` | Acceptance quantile (0–1); 0.75 keeps top 25% of shots |
+| `galton_window` | `64` | Rolling window for adaptive threshold estimation |
+| `galton_warmup` | `32` | Minimum shots before threshold activates |
+| `probe_pairs` | `"nn"` | Probe placement: `"nn"` (nearest-neighbour) or `"all"` |
+
+### Validated on real IBM hardware
+
+| Backend | Qubits | Protocol | Key Result |
+|---|---|---|---|
+| IBM Fez (Heron r2) | 156 | 2Q Bell state, 100 shots | **95% fidelity** on filtered shots |
+| IBM Torino (Heron r2) | 133 | Utility-scale TFIM | Galton acceptance ~9.7% |
+| IBM Brisbane (Eagle r3) | 127 | 8Q TFIM VQE | **6.6% acceptance** vs 0% raw post-selection |
+
+### E2E physics validation (simulator)
+
+10-trial paired experiment (8Q TFIM, IBM Heron noise model):
+
+| Metric | Value |
+|---|---|
+| Mean MSE reduction | **+0.69%** |
+| Paired t-test | **p = 1.26 × 10⁻⁴** |
+| Trials improved | **9 / 10** |
+
+> **Bottom line:** one `import` swap, no circuit changes, measurable physics
+> improvement on both simulators and real IBM hardware.
+
+[Full middleware documentation →](https://ranbuch.github.io/qgate-trajectory-filter/middleware/qgate-sampler/)
+
+---
+
 ## Experimental Validation
 
 All claims are backed by reproducible experiments on **real IBM Quantum hardware**
@@ -274,8 +348,10 @@ steps for each algorithm are in the respective directories below:
 qgate-trajectory-filter/
 ├── packages/qgate/              # 📦 pip-installable Python package
 │   ├── src/qgate/               #    Core conditioning & monitoring
-│   │   └── adapters/            #    Mock, Qiskit, Grover, QAOA, VQE, QPE adapters
-│   ├── tests/                   #    376 unit tests (pytest)
+│   │   ├── adapters/            #    Mock, Qiskit, Grover, QAOA, VQE, QPE adapters
+│   │   └── sampler.py           #    🆕 QgateSampler — SamplerV2 middleware
+│   ├── tests/                   #    406 unit tests (pytest)
+│   ├── docs/middleware/         #    QgateSampler documentation
 │   └── pyproject.toml           #    Build config (hatchling)
 │
 ├── results/                     # 📊 Bias study & experiment result JSONs
@@ -309,6 +385,7 @@ qgate-trajectory-filter/
 | Resource | Description |
 |---|---|
 | [Architecture & Methodology](docs/architecture.md) | System design, conditioning strategies, TSVF experiments, validation chain |
+| [QgateSampler Middleware](https://ranbuch.github.io/qgate-trajectory-filter/middleware/qgate-sampler/) | Drop-in SamplerV2 replacement — API reference, usage, validation results |
 | [Statistical Validation (Bias Study)](https://ranbuch.github.io/qgate-trajectory-filter/experiments/bias-study/) | MSE↓ up to 20.7%, variance↓ 5,360×, algorithm-agnostic across VQE/QAOA/Grover |
 | [Package API Reference](packages/qgate/README.md) | Full `qgate` API docs, install guide, class/function reference |
 | [Grover vs TSVF-Grover](simulations/grover_tsvf/README.md) | IBM Fez — 7.3× advantage at iteration 4 |
@@ -326,7 +403,7 @@ qgate-trajectory-filter/
 git clone https://github.com/ranbuch/qgate-trajectory-filter.git
 cd qgate-trajectory-filter
 pip install -e "packages/qgate[dev]"
-pytest packages/qgate/tests/ -v        # 376 tests
+pytest packages/qgate/tests/ -v        # 406 tests
 ruff check packages/qgate/src/         # lint
 mypy packages/qgate/src/               # type-check
 ```
