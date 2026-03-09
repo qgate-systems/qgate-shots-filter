@@ -16,7 +16,7 @@ class TestVersionCommand:
         result = runner.invoke(app, ["version"])
         assert result.exit_code == 0
         assert "qgate" in result.output
-        assert "0.5.0" in result.output
+        assert "0.6.0" in result.output
 
 
 class TestValidateCommand:
