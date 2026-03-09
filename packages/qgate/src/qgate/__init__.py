@@ -27,7 +27,7 @@ Install extras for specific backends::
 License: QGATE SOURCE AVAILABLE EVALUATION LICENSE v1.2 — see LICENSE
 """
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 # ── Primary public API ────────────────────────────────────────────────────
 from qgate.adapters.base import BaseAdapter
@@ -74,6 +74,12 @@ from qgate.threshold import (
     estimate_diffusion_width,
 )
 
+# ── QgateSampler OS layer ─────────────────────────────────────────────────
+# Transparent drop-in SamplerV2 replacement with autonomous probe injection
+# and Galton-filtered result reconstruction.
+# Patent pending — US App. Nos. 63/983,831 & 63/989,632, IL 326915.
+from qgate.sampler import QgateSampler, SamplerConfig
+
 __all__ = [
     "AdapterKind",
     # Primary API
@@ -97,7 +103,10 @@ __all__ = [
     "QAOATSVFAdapter",
     # QPE/TSVF adapter
     "QPETSVFAdapter",
+    # QgateSampler OS
+    "QgateSampler",
     "RunLogger",
+    "SamplerConfig",
     "ThresholdMode",
     "TrajectoryFilter",
     # VQE/TSVF adapter
