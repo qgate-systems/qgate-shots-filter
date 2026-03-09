@@ -26,9 +26,9 @@ Usage::
 
 Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
 
-**NOTICE — PRE-PATENT PROPRIETARY CODE**
-This module contains inventions not yet covered by an issued patent.
-Do NOT distribute, publish, or push to any public repository.
+Licensed under the QGATE Source Available Evaluation License v1.2.
+Academic research, internal evaluation, and peer review are freely permitted.
+Commercial deployment requires a separate license.
 """
 
 from __future__ import annotations

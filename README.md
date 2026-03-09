@@ -234,29 +234,28 @@ pip install qgate[all]         # Everything
 ## QgateSampler — Drop-in SamplerV2 Middleware
 
 `QgateSampler` is a **transparent drop-in replacement** for Qiskit's `SamplerV2`.
-Wrap any existing sampler and every `run()` call is automatically enhanced with
+Wrap any backend and every `run()` call is automatically enhanced with
 probe injection, Galton-filtered post-selection, and clean result reconstruction —
 **zero changes to your circuit code**.
 
 ```python
-from qiskit_ibm_runtime import SamplerV2
+from qiskit_ibm_runtime import QiskitRuntimeService
 from qgate import QgateSampler, SamplerConfig
 
+service = QiskitRuntimeService()
+backend = service.backend("ibm_fez")
+
 # ── Before: standard IBM sampler ───────────────────────────────────
+# from qiskit_ibm_runtime import SamplerV2
 # sampler = SamplerV2(mode=backend)
-# result  = sampler.run([pub])
+# job     = sampler.run([pub])
+# result  = job.result()
 
 # ── After: one-line swap ───────────────────────────────────────────
-sampler = QgateSampler(
-    inner=SamplerV2(mode=backend),
-    config=SamplerConfig(
-        probe_ry_angle=0.25,       # controlled-RY probe strength
-        galton_quantile=0.75,      # keep top-25% fidelity tail
-        galton_window=64,          # adaptive threshold window
-    ),
-)
-result = sampler.run([pub])        # ← same API, filtered results
-counts = result[0].data.meas.get_counts()
+sampler = QgateSampler(backend=backend)
+job     = sampler.run([pub])           # same API as SamplerV2
+result  = job.result()                 # standard PrimitiveResult, filtered
+counts  = result[0].data.meas.get_counts()
 ```
 
 ### What happens under the hood
@@ -270,15 +269,30 @@ counts = result[0].data.meas.get_counts()
    `PrimitiveResult` / `PubResult` / `BitArray` — fully compatible with
    downstream Qiskit code
 
-### Configuration reference
+### Tuning the filter
+
+Pass a `SamplerConfig` to adjust probe strength and acceptance behaviour:
+
+```python
+sampler = QgateSampler(
+    backend=backend,
+    config=SamplerConfig(
+        probe_angle=0.5,           # controlled-RY angle (default π/6 ≈ 0.52)
+        target_acceptance=0.10,    # keep top 10% of shots (default 5%)
+        window_size=2048,          # Galton rolling window (default 4096)
+    ),
+)
+```
 
 | Parameter | Default | Description |
 |---|---|---|
-| `probe_ry_angle` | `0.25` | Controlled-RY rotation (radians); higher = stronger probe signal |
-| `galton_quantile` | `0.75` | Acceptance quantile (0–1); 0.75 keeps top 25% of shots |
-| `galton_window` | `64` | Rolling window for adaptive threshold estimation |
-| `galton_warmup` | `32` | Minimum shots before threshold activates |
-| `probe_pairs` | `"nn"` | Probe placement: `"nn"` (nearest-neighbour) or `"all"` |
+| `probe_angle` | `π/6` | Controlled-RY rotation (radians); higher = stronger probe signal |
+| `target_acceptance` | `0.05` | Fraction of shots to keep (0–1); 0.05 keeps top 5% |
+| `window_size` | `4096` | Rolling window for adaptive threshold estimation |
+| `min_window_size` | `100` | Minimum shots before threshold activates (warmup) |
+| `baseline_threshold` | `0.65` | Fallback threshold during warmup phase |
+| `use_quantile` | `True` | Empirical quantile mode (recommended) |
+| `oversample_factor` | `1.0` | Request extra shots to compensate for filtering (1.0 = off) |
 
 ### Validated on real IBM hardware
 

@@ -27,7 +27,7 @@ Install extras for specific backends::
 License: QGATE SOURCE AVAILABLE EVALUATION LICENSE v1.2 — see LICENSE
 """
 
-__version__ = "0.5.1"
+__version__ = "0.6.0"
 
 # ── Primary public API ────────────────────────────────────────────────────
 from qgate.adapters.base import BaseAdapter
