@@ -73,8 +73,7 @@ except ImportError:
 def _require_deps() -> None:
     if not HAS_QISKIT:
         raise ImportError(
-            "Qiskit is required for QgateSampler.  "
-            "Install with:  pip install qgate[qiskit]"
+            "Qiskit is required for QgateSampler.  Install with:  pip install qgate[qiskit]"
         )
     if not HAS_RUNTIME:
         raise ImportError(
@@ -157,9 +156,7 @@ class SamplerConfig(BaseModel):  # type: ignore[misc]
     min_threshold: float = Field(default=0.3, ge=0.0, le=1.0, description="Threshold floor")
     max_threshold: float = Field(default=0.95, ge=0.0, le=1.0, description="Threshold ceiling")
     use_quantile: bool = Field(default=True, description="Use empirical quantile (recommended)")
-    robust_stats: bool = Field(
-        default=True, description="Use median + MAD for z-score mode"
-    )
+    robust_stats: bool = Field(default=True, description="Use median + MAD for z-score mode")
     z_sigma: float = Field(default=1.645, ge=0.0, description="Std-dev multiplier (z-score mode)")
     optimization_level: int = Field(
         default=1, ge=0, le=3, description="Qiskit transpiler optimization level"
@@ -290,9 +287,7 @@ class QgateSamplerResult:
     def result(self) -> Any:
         """Return the Galton-filtered ``PrimitiveResult``."""
         if self._filtered is None:
-            self._filtered = self._sampler._apply_galton_filter(
-                self._raw, self._probe_meta
-            )
+            self._filtered = self._sampler._apply_galton_filter(self._raw, self._probe_meta)
         return self._filtered
 
     # Forward all other attribute access to the raw result (transparency)
@@ -421,9 +416,7 @@ class QgateSampler:
 
             # --- Oversample to compensate for filtering ---
             if effective_shots is not None and self._config.oversample_factor > 1.0:
-                effective_shots = math.ceil(
-                    effective_shots * self._config.oversample_factor
-                )
+                effective_shots = math.ceil(effective_shots * self._config.oversample_factor)
 
             # --- Transpile for backend ---
             isa_circuit = self._pass_manager.run(probed_circuit)
@@ -568,16 +561,14 @@ class QgateSampler:
             data = pub_result.data
 
             # Get all classical register names
-            creg_names = [
-                attr for attr in dir(data) if not attr.startswith("_")
-            ]
+            creg_names = [attr for attr in dir(data) if not attr.startswith("_")]
 
             # Separate probe bits from system bits
             probe_bitarray = getattr(data, probe_creg_name, None)
             system_creg_names = [
-                name for name in creg_names
-                if name != probe_creg_name
-                and isinstance(getattr(data, name, None), BitArray)
+                name
+                for name in creg_names
+                if name != probe_creg_name and isinstance(getattr(data, name, None), BitArray)
             ]
 
             if probe_bitarray is None:
@@ -620,8 +611,7 @@ class QgateSampler:
                 n_accepted = int(accepted_mask.sum())
                 if n_accepted == 0:
                     logger.warning(
-                        "PUB %d: no ancilla=1 shots either — "
-                        "returning all shots unfiltered",
+                        "PUB %d: no ancilla=1 shots either — returning all shots unfiltered",
                         pub_idx,
                     )
                     accepted_mask = np.ones(n_shots, dtype=bool)
