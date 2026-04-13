@@ -7,7 +7,7 @@ This directory contains the complete pipeline for running the utility-scale
 Transverse-Field Ising Model (TFIM) experiment on IBM Quantum hardware,
 using the qgate TSVF trajectory filter as a post-selection middleware.
 
-**Patent reference:** US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+**Patent reference:** Patent pending.
 
 ---
 
@@ -225,7 +225,7 @@ than IBM's published ZNE result.**
 
 ```bash
 # Activate the virtual environment
-source /Users/ranbuchnik/Dev/timehandshake-sim/.venv/bin/activate
+source .venv/bin/activate
 
 # Ensure qgate + dependencies are installed
 pip install -e packages/qgate[qiskit]

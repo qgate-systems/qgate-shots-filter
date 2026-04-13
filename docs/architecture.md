@@ -1,6 +1,6 @@
 # Architecture & Methodology
 
-> **Patent notice:** US Patent Application Nos. 63/983,831 & 63/989,632 | Israeli Patent Application No. 326915. The underlying invention is patent pending.
+> **Patent notice:** The underlying methods are covered by pending patent applications.
 
 ---
 
@@ -108,7 +108,7 @@ ancilla-based Z-parity checks with reset and reuse.
 ## Project Structure
 
 ```
-qgate-trajectory-filter/
+qgate-shots-filter/
 ├── packages/
 │   └── qgate/                    # Pip-installable developer toolkit
 │       ├── src/qgate/            # Core library (conditioning + monitors)

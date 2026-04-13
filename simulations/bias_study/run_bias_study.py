@@ -39,7 +39,7 @@ Usage:
     python run_bias_study.py --shots 200000       # more shots per trial
     python run_bias_study.py --layers 1 2 3       # specific depths
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 from __future__ import annotations
 

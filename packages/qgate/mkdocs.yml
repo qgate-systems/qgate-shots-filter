@@ -4,10 +4,10 @@ site_description: >-
   Runtime trajectory filtering via Bell-pair post-selection conditioning, score fusion,
   and Galton adaptive thresholding. Validated on IBM Quantum hardware (up to 133 qubits)
   with up to 7.3× fidelity improvement. Patent pending.
-site_url: https://ranbuch.github.io/qgate-trajectory-filter
+site_url: https://qgate-systems.github.io/qgate-shots-filter
 site_author: Ran Buchnik
-repo_url: https://github.com/ranbuch/qgate-trajectory-filter
-repo_name: ranbuch/qgate-trajectory-filter
+repo_url: https://github.com/qgate-systems/qgate-shots-filter
+repo_name: qgate-systems/qgate-shots-filter
 
 theme:
   name: material
@@ -93,7 +93,7 @@ extra_javascript:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/ranbuch/qgate-trajectory-filter
+      link: https://github.com/qgate-systems/qgate-shots-filter
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/qgate/
   analytics:
@@ -134,6 +134,5 @@ nav:
   - License: license.md
 
 copyright: >-
-  © 2024–2026 Ran Buchnik — US Patent App. Nos. 63/983,831 & 63/989,632 |
-  Israeli Patent App. No. 326915. Patent pending.
+  © 2024–2026 Ran Buchnik — Patent pending.
   QGATE Source Available Evaluation License v1.2 — commercial deployment requires a separate license.

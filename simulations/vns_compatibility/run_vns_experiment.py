@@ -39,7 +39,7 @@ Requires:
     pip install -e packages/qgate[qiskit]
     pip install qiskit-aer qiskit-ibm-runtime matplotlib
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 from __future__ import annotations
 
@@ -643,7 +643,7 @@ def plot_results(results_a: list[dict], results_b: list[dict]) -> list[Path]:
 def main():
     print("=" * 72)
     print("VNS + TRAJECTORY FILTERING COMPATIBILITY EXPERIMENT")
-    print("Patent ref: US App. Nos. 63/983,831 & 63/989,632 | IL 326915")
+    print("Patent pending (see LICENSE)")
     print("=" * 72)
     print()
 

@@ -15,7 +15,7 @@ Usage
     python qiskit_experiment/run_ibm_experiment.py --mode aer \\
         --shots 2000 --N 1 2 4 --D 2 4 --W 2
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 from __future__ import annotations
 
@@ -165,7 +165,7 @@ def get_ibm_backend(token: str | None = None,
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description="IBM Quantum dynamic-circuit post-selection experiment. "
-                    "Patent ref: US 63/983,831 & 63/989,632 | IL 326915",
+                    "Patent pending",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -233,7 +233,7 @@ def main():
 
     print("=" * 72)
     print("QUANTUM ERROR SUPPRESSION VIA POST-SELECTION CONDITIONING")
-    print("Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915")
+    print("Patent pending (see LICENSE)")
     print("=" * 72)
     print(f"Mode:    {args.mode}")
     print(f"Output:  {args.output_dir}")

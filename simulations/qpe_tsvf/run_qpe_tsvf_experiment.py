@@ -24,7 +24,7 @@ Modes:
   --mode aer    Local AerSimulator with realistic noise model
   --mode ibm    Real IBM Quantum hardware (reads token from .secrets.json)
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 from __future__ import annotations
 
@@ -530,9 +530,9 @@ def save_metadata(
         ],
         "num_configs": len(results),
         "patent_refs": [
-            "US App. No. 63/983,831 (Feb 16, 2026)",
-            "US App. No. 63/989,632 (Feb 24, 2026)",
-            "IL App. No. 326915",
+            "Pending U.S. patent application",
+            "Pending U.S. patent application",
+            "Pending Israeli patent application",
         ],
     }
     path = out_dir / "experiment_metadata.json"

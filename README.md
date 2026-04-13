@@ -1,11 +1,11 @@
 # qgate: Time-Symmetric Trajectory Filtering for NISQ Hardware
 
-[![CI](https://github.com/ranbuch/qgate-trajectory-filter/actions/workflows/ci.yml/badge.svg)](https://github.com/ranbuch/qgate-trajectory-filter/actions/workflows/ci.yml)
+[![CI](https://github.com/qgate-systems/qgate-shots-filter/actions/workflows/ci.yml/badge.svg)](https://github.com/qgate-systems/qgate-shots-filter/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/qgate.svg)](https://pypi.org/project/qgate/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://python.org)
 [![License: Source Available](https://img.shields.io/badge/license-Source%20Available%20v1.2-blue.svg)](LICENSE)
 
-**Status:** Patent Pending — U.S. App. Nos. 63/983,831 & 63/989,632 | Israel App. No. 326915
+**Status:** Patent Pending
 
 qgate is a hardware-agnostic middleware that uses Score Fusion and Galton-based dynamic thresholding to rescue deep quantum circuits from combinatorial noise collapse, achieving "QEC-like" error suppression on existing NISQ hardware.
 
@@ -113,7 +113,7 @@ using an IBM Heron-class noise model ($T_1 = 300\mu s$, $T_2 = 150\mu s$,
 
 Full results: [`results/`](results/) |
 Experiment scripts: [`simulations/paper_experiments/`](simulations/paper_experiments/) |
-[Documentation →](https://ranbuch.github.io/qgate-trajectory-filter/experiments/bias-study/)
+[Documentation →](https://qgate-systems.github.io/qgate-shots-filter/experiments/bias-study/)
 
 ---
 
@@ -315,7 +315,7 @@ sampler = QgateSampler(
 > **Bottom line:** one `import` swap, no circuit changes, measurable physics
 > improvement on both simulators and real IBM hardware.
 
-[Full middleware documentation →](https://ranbuch.github.io/qgate-trajectory-filter/middleware/qgate-sampler/)
+[Full middleware documentation →](https://qgate-systems.github.io/qgate-shots-filter/middleware/qgate-sampler/)
 
 ---
 
@@ -328,9 +328,9 @@ and systematic statistical benchmarks:
 
 | Experiment | Configuration | Key Finding |
 |---|---|---|
-| [Noise robustness](https://ranbuch.github.io/qgate-trajectory-filter/experiments/bias-study/#experiment-1-noise-robustness) | 8q, 7 noise levels | MSE↓ 13.6–20.7%, **improves with noise** |
-| [Qubit scaling](https://ranbuch.github.io/qgate-trajectory-filter/experiments/bias-study/#experiment-2-qubit-scaling) | 8/12/16 qubits | Stable MSE↓ 14–17%, **variance↓ up to 5,360×** |
-| [Cross-algorithm](https://ranbuch.github.io/qgate-trajectory-filter/experiments/bias-study/#experiment-3-cross-algorithm-validation) | VQE, QAOA, Grover | **Algorithm-agnostic** MSE↓ 14.8–48.8% |
+| [Noise robustness](https://qgate-systems.github.io/qgate-shots-filter/experiments/bias-study/#experiment-1-noise-robustness) | 8q, 7 noise levels | MSE↓ 13.6–20.7%, **improves with noise** |
+| [Qubit scaling](https://qgate-systems.github.io/qgate-shots-filter/experiments/bias-study/#experiment-2-qubit-scaling) | 8/12/16 qubits | Stable MSE↓ 14–17%, **variance↓ up to 5,360×** |
+| [Cross-algorithm](https://qgate-systems.github.io/qgate-shots-filter/experiments/bias-study/#experiment-3-cross-algorithm-validation) | VQE, QAOA, Grover | **Algorithm-agnostic** MSE↓ 14.8–48.8% |
 
 ### Core Conditioning Experiments
 
@@ -359,7 +359,7 @@ steps for each algorithm are in the respective directories below:
 ## Repository Structure
 
 ```
-qgate-trajectory-filter/
+qgate-shots-filter/
 ├── packages/qgate/              # 📦 pip-installable Python package
 │   ├── src/qgate/               #    Core conditioning & monitoring
 │   │   ├── adapters/            #    Mock, Qiskit, Grover, QAOA, VQE, QPE adapters
@@ -399,8 +399,8 @@ qgate-trajectory-filter/
 | Resource | Description |
 |---|---|
 | [Architecture & Methodology](docs/architecture.md) | System design, conditioning strategies, TSVF experiments, validation chain |
-| [QgateSampler Middleware](https://ranbuch.github.io/qgate-trajectory-filter/middleware/qgate-sampler/) | Drop-in SamplerV2 replacement — API reference, usage, validation results |
-| [Statistical Validation (Bias Study)](https://ranbuch.github.io/qgate-trajectory-filter/experiments/bias-study/) | MSE↓ up to 20.7%, variance↓ 5,360×, algorithm-agnostic across VQE/QAOA/Grover |
+| [QgateSampler Middleware](https://qgate-systems.github.io/qgate-shots-filter/middleware/qgate-sampler/) | Drop-in SamplerV2 replacement — API reference, usage, validation results |
+| [Statistical Validation (Bias Study)](https://qgate-systems.github.io/qgate-shots-filter/experiments/bias-study/) | MSE↓ up to 20.7%, variance↓ 5,360×, algorithm-agnostic across VQE/QAOA/Grover |
 | [Package API Reference](packages/qgate/README.md) | Full `qgate` API docs, install guide, class/function reference |
 | [Grover vs TSVF-Grover](simulations/grover_tsvf/README.md) | IBM Fez — 7.3× advantage at iteration 4 |
 | [QAOA vs TSVF-QAOA](simulations/qaoa_tsvf/README.md) | IBM Torino — 1.88× advantage at p=1 |
@@ -414,8 +414,8 @@ qgate-trajectory-filter/
 ## For Contributors / Local Development
 
 ```bash
-git clone https://github.com/ranbuch/qgate-trajectory-filter.git
-cd qgate-trajectory-filter
+git clone https://github.com/qgate-systems/qgate-shots-filter.git
+cd qgate-shots-filter
 pip install -e "packages/qgate[dev]"
 pytest packages/qgate/tests/ -v        # 406 tests
 ruff check packages/qgate/src/         # lint

@@ -17,7 +17,7 @@ faq:
   - q: How do I install qgate?
     a: Install from PyPI with pip install qgate. For IBM Quantum support use pip install qgate[qiskit]. Requires Python 3.9 or higher. Use QgateSampler for instant filtered results with zero circuit changes.
   - q: Is qgate open source?
-    a: qgate is released under the QGATE Source Available Evaluation License v1.2, which permits academic research and internal corporate evaluation. Commercial deployment requires a separate license. Patent pending (US 63/983,831, US 63/989,632, IL 326915).
+    a: qgate is released under the QGATE Source Available Evaluation License v1.2, which permits academic research and internal corporate evaluation. Commercial deployment requires a separate license. Patent pending (patent pending).
 ---
 
 # qgate — Quantum Trajectory Filter
@@ -184,12 +184,11 @@ Systematic bias study: **15 independent trials × 100,000 shots**, IBM Heron-cla
 - :material-speedometer: **NumPy vectorisation** — Batch operations for scoring and filtering
 - :material-lock-check: **Frozen config** — All Pydantic models are immutable
 
-See the full [Changelog](https://github.com/ranbuch/qgate-trajectory-filter/blob/main/packages/qgate/CHANGELOG.md).
+See the full [Changelog](https://github.com/qgate-systems/qgate-shots-filter/blob/main/packages/qgate/CHANGELOG.md).
 
 ## Patent Notice
 
 !!! warning "Patent Pending"
     This package explores runtime trajectory filtering concepts from
-    US Patent Application Nos. 63/983,831 & 63/989,632 and Israeli Patent
-    Application No. 326915. The underlying invention is patent pending.
+    The underlying methods are covered by pending patent applications.
     See [License](license.md) for details.

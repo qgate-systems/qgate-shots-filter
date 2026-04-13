@@ -25,7 +25,7 @@ Protocol:
 **NOTICE — PRE-PATENT PROPRIETARY CODE**
 Do NOT distribute, publish, or push to any public repository.
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 
 Usage:
     python simulations/qgate_os/test_ibm_cloud_api.py

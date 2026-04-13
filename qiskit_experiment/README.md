@@ -1,6 +1,6 @@
 # Quantum Error Suppression via Post-Selection Conditioning on Bell-Pair Subsystems
 
-**Patent Reference:** US Patent Application Nos. 63/983,831 & 63/989,632 | IL Patent Application No. 326915
+**Patent Reference:** Patent pending.
 
 ## Overview
 
@@ -207,7 +207,7 @@ qiskit_experiment/
 ## Relation to Patent Claims
 
 This experiment provides **empirical evidence** for the claims in
-US Patent Application Nos. 63/983,831 & 63/989,632 | IL Patent Application No. 326915:
+Patent pending:
 
 1. **Claim 1 (Hierarchical conditioning):** Demonstrated via the
    k-of-N rule — acceptance probability remains high even at large N

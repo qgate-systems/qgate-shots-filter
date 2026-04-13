@@ -12,8 +12,8 @@ Thank you for your interest in contributing to qgate!
 ## Development Setup
 
 ```bash
-git clone https://github.com/ranbuch/qgate-trajectory-filter.git
-cd qgate-trajectory-filter/packages/qgate
+git clone https://github.com/qgate-systems/qgate-shots-filter.git
+cd qgate-shots-filter/packages/qgate
 pip install -e ".[dev]"
 ```
 
@@ -75,7 +75,7 @@ test: add edge-case tests for empty outcomes
 ## Patent Notice
 
 This package explores runtime trajectory filtering concepts from
-US Patent Application Nos. 63/983,831 & 63/989,632 and Israeli Patent Application No. 326915.
+The underlying methods are covered by pending patent applications.
 The underlying invention is patent pending.
 
 ## License

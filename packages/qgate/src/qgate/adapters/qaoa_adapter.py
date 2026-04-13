@@ -25,7 +25,7 @@ The adapter supports two algorithm variants via ``algorithm_mode``:
   into two sets that maximises the number of edges crossing the cut.
   The QAOA cost operator encodes ``C = Σ_{(i,j)∈E} ½(1 - Z_i·Z_j)``.
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 
 from __future__ import annotations

@@ -2,7 +2,7 @@
 description: >-
   QGATE Source Available Evaluation License v1.2. Permits academic research and internal
   corporate evaluation. Commercial deployment requires a separate license.
-  Patent pending: US 63/983,831, US 63/989,632, IL 326915.
+  Patent pending.
 keywords: qgate license, source available license, quantum computing license, patent pending, commercial license, academic research license
 ---
 
@@ -72,9 +72,8 @@ you must:
 
 This Software implements methods covered by pending patent applications:
 
-- **US App. No. 63/983,831**
-- **US App. No. 63/989,632**
-- **Israeli App. No. 326915**
+- Pending U.S. patent applications
+- Pending Israeli patent application
 - Any associated continuations, non-provisional filings, or foreign counterparts.
 
 For **Permitted Uses** (Section 2): non-exclusive, non-transferable,

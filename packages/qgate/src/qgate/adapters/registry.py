@@ -13,7 +13,7 @@ Example::
     AdapterCls = load_adapter("mock")
     adapter = AdapterCls(error_rate=0.05, seed=42)
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 
 from __future__ import annotations

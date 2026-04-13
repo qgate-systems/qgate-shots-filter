@@ -19,7 +19,7 @@ The adapter supports two algorithm variants via ``algorithm_mode``:
   - ``"tsvf"``     — Oracle + chaotic ansatz + weak-measurement ancilla
                      per iteration (post-selection trajectory filter).
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 
 from __future__ import annotations

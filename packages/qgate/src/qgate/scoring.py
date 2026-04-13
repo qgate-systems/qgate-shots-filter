@@ -7,7 +7,7 @@ stateless scoring API alongside the stateful :class:`MultiRateMonitor`.
 Scoring is vectorised with NumPy:  :func:`score_batch` processes all
 shots in a single array operation, avoiding per-shot Python loops.
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 
 from __future__ import annotations

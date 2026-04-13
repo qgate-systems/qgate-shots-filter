@@ -16,7 +16,7 @@ Multi-rate labelling:
   • HF (high-frequency): every cycle
   • LF (low-frequency):  every 2 cycles (even-indexed: 0, 2, 4, …)
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 from __future__ import annotations
 

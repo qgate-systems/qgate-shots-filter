@@ -3,7 +3,7 @@ qgate — Quantum Trajectory Filter.
 
 Runtime post-selection conditioning for quantum circuits.  This package
 explores trajectory filtering concepts from US Patent Application
-Nos. 63/983,831 & 63/989,632 and Israeli Patent Application No. 326915.
+pending patent applications (see LICENSE).
 The underlying invention is patent pending.
 
 Quick start::
@@ -67,7 +67,7 @@ from qgate.run_logging import FilterResult, RunLogger, compute_run_id
 # ── QgateSampler OS layer ─────────────────────────────────────────────────
 # Transparent drop-in SamplerV2 replacement with autonomous probe injection
 # and Galton-filtered result reconstruction.
-# Patent pending — US App. Nos. 63/983,831 & 63/989,632, IL 326915.
+# Patent pending.
 from qgate.sampler import QgateSampler, SamplerConfig
 from qgate.scoring import (
     fuse_scores,

@@ -620,9 +620,9 @@ sampler = QgateSampler(backend=backend, config=config)??? question "Is QgateSamp
 
 | **IBM Fez** | Heron r2 | 156 | 2Q Bell state, 100 shots | **95% Bell fidelity** on filtered shots; probe stripped cleanly |
 
-| **IBM Torino** | Heron r2 | 133 | Utility-scale TFIM | Galton acceptance ~9.7%; cooling Δ = −0.080 |- **U.S.** App. Nos. 63/983,831 & 63/989,632
+| **IBM Torino** | Heron r2 | 133 | Utility-scale TFIM | Galton acceptance ~9.7%; cooling Δ = −0.080 | Patent pending
 
-| **IBM Brisbane** | Eagle r3 | 127 | 8Q TFIM VQE | **6.6% acceptance** (vs 0% raw post-selection) |- **Israel** App. No. 326915 (Paris Convention, priority date 27/02/2026)
+| **IBM Brisbane** | Eagle r3 | 127 | 8Q TFIM VQE | **6.6% acceptance** (vs 0% raw post-selection) | Patent pending
 
 
 
@@ -695,8 +695,8 @@ using an IBM Heron-class noise model ($T_1 = 300\mu s$, $T_2 = 150\mu s$,[ranbuc
 The algorithms implemented in `QgateSampler` are covered by pending patent
 applications:
 
-- **U.S.** App. Nos. 63/983,831 & 63/989,632
-- **Israel** App. No. 326915 (Paris Convention, priority date 27/02/2026)
+- Pending U.S. patent applications
+- Pending Israeli patent application
 
 Licensed under the **QGATE Source Available Evaluation License v1.2**.
 Academic research, internal evaluation, and peer review are freely permitted.

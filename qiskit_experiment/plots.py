@@ -9,7 +9,7 @@ Generates:
 
 All figures saved as PNGs (300 dpi) into <output_dir>/patent_appendix/.
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 from __future__ import annotations
 
@@ -115,7 +115,7 @@ def _plot_acceptance_vs_N(df: pd.DataFrame, out: Path) -> str:
 
     axes[-1].legend(fontsize=9, loc="best")
     fig.suptitle("Acceptance Probability vs System Size\n"
-                 "US 63/983,831 & 63/989,632 | IL 326915", fontsize=14, fontweight="bold", y=1.02)
+                 "Patent pending", fontsize=14, fontweight="bold", y=1.02)
     fig.tight_layout()
 
     fig.savefig(path, dpi=300, bbox_inches="tight")
@@ -160,7 +160,7 @@ def _plot_tts_vs_N(df: pd.DataFrame, out: Path) -> str:
 
     axes[-1].legend(fontsize=9, loc="best")
     fig.suptitle("Time-to-Solution vs System Size\n"
-                 "US 63/983,831 & 63/989,632 | IL 326915", fontsize=14, fontweight="bold", y=1.02)
+                 "Patent pending", fontsize=14, fontweight="bold", y=1.02)
     fig.tight_layout()
 
     fig.savefig(path, dpi=300, bbox_inches="tight")
@@ -197,7 +197,7 @@ def _plot_fusion_vs_alpha(df: pd.DataFrame, out: Path) -> str:
     ax.set_xlabel("α (LF weight in fusion)", fontsize=12)
     ax.set_ylabel("Acceptance probability", fontsize=12)
     ax.set_title(f"Score Fusion: Acceptance vs α  (D={D_max})\n"
-                 f"US 63/983,831 & 63/989,632 | IL 326915", fontsize=13, fontweight="bold")
+                 f"Patent pending", fontsize=13, fontweight="bold")
     ax.legend(fontsize=10)
     ax.grid(True, alpha=0.3)
     ax.set_ylim(-0.05, 1.05)
@@ -248,7 +248,7 @@ def _plot_probe_heatmap(df: pd.DataFrame, out: Path) -> str:
 
     plt.colorbar(im, ax=ax, label="Probe pass-rate")
     ax.set_title("Batch-Level Abort: Probe Pass-Rate\n"
-                 "US 63/983,831 & 63/989,632 | IL 326915", fontsize=13, fontweight="bold")
+                 "Patent pending", fontsize=13, fontweight="bold")
     fig.tight_layout()
 
     path = out / "probe_heatmap.png"
@@ -290,7 +290,7 @@ def _plot_acceptance_by_depth(df: pd.DataFrame, out: Path) -> str:
 
     axes[-1].legend(fontsize=8, loc="best")
     fig.suptitle("Acceptance vs Scramble Depth\n"
-                 "US 63/983,831 & 63/989,632 | IL 326915", fontsize=14, fontweight="bold", y=1.02)
+                 "Patent pending", fontsize=14, fontweight="bold", y=1.02)
     fig.tight_layout()
 
     fig.savefig(path, dpi=300, bbox_inches="tight")

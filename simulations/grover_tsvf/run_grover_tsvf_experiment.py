@@ -22,7 +22,7 @@ Modes:
   --mode aer    Local AerSimulator with realistic noise model
   --mode ibm    Real IBM Quantum hardware (reads token from .secrets.json)
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 from __future__ import annotations
 
@@ -329,7 +329,7 @@ def generate_plots(results: list[dict], out_dir: Path, backend_name: str):
     d_std = [r["depth_standard"] for r in results]
     d_tsvf = [r["depth_tsvf"] for r in results]
 
-    patent_ref = "US 63/983,831 & 63/989,632 | IL 326915"
+    patent_ref = "Patent pending"
 
     # ── Plot 1: Probability of Success vs Iterations ──────────────────
     fig1, ax1 = plt.subplots(figsize=(10, 6))
@@ -510,7 +510,7 @@ def main():
     print("=" * 72)
     print("GROVER vs TSVF-CHAOTIC GROVER — qgate TRAJECTORY FILTER EXPERIMENT")
     print("Package: qgate v0.5.0  (GroverTSVFAdapter + Galton thresholding)")
-    print("Patent ref: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915")
+    print("Patent pending (see LICENSE)")
     print("=" * 72)
 
     if args.mode == "ibm":
@@ -563,7 +563,7 @@ def main():
         "elapsed_seconds": round(elapsed, 1),
         "qgate_version": "0.5.0",
         "adapter": "GroverTSVFAdapter",
-        "patent_ref": "US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915",
+        "patent_ref": "Patent pending",
     }
     with open(out_dir / "run_metadata.json", "w") as f:
         json.dump(meta, f, indent=2)

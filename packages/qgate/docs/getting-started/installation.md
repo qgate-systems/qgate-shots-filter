@@ -11,8 +11,8 @@ keywords: qgate installation, pip install qgate, quantum computing setup, qiskit
 ## From source (recommended during development)
 
 ```bash
-git clone https://github.com/ranbuch/qgate-trajectory-filter.git
-cd qgate-trajectory-filter/packages/qgate
+git clone https://github.com/qgate-systems/qgate-shots-filter.git
+cd qgate-shots-filter/packages/qgate
 pip install -e ".[dev]"
 ```
 

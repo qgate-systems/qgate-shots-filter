@@ -72,10 +72,10 @@ pennylane = "qgate.adapters.pennylane_adapter:PennyLaneAdapter"
 
 [project.urls]
 Homepage = "https://pypi.org/project/qgate/"
-Repository = "https://github.com/ranbuch/qgate-trajectory-filter"
-Documentation = "https://ranbuch.github.io/qgate-trajectory-filter"
-Changelog = "https://github.com/ranbuch/qgate-trajectory-filter/blob/main/packages/qgate/CHANGELOG.md"
-"Bug Tracker" = "https://github.com/ranbuch/qgate-trajectory-filter/issues"
+Repository = "https://github.com/qgate-systems/qgate-shots-filter"
+Documentation = "https://qgate-systems.github.io/qgate-shots-filter"
+Changelog = "https://github.com/qgate-systems/qgate-shots-filter/blob/main/packages/qgate/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/qgate-systems/qgate-shots-filter/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/qgate"]

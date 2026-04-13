@@ -4,7 +4,7 @@ config.py — Pydantic v2 configuration models for qgate.
 All configuration objects are JSON-serialisable, immutable (``frozen=True``),
 and carry field-level validation.
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 
 from __future__ import annotations

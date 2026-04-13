@@ -29,7 +29,7 @@ Usage:
     python run_galton_experiment.py --mode ibm --shots 10000 \\
         --N 2 4 8 --W 2 4 --D 2 4
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 from __future__ import annotations
 
@@ -328,7 +328,7 @@ def main():
     print("=" * 72)
     print("GALTON ADAPTIVE THRESHOLD — IBM HARDWARE COMPARISON")
     print("fixed  vs  rolling_z  vs  galton_quantile  vs  galton_zscore")
-    print("Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915")
+    print("Patent pending (see LICENSE)")
     print("=" * 72)
     print(f"Mode:     {args.mode}")
     print(f"N:        {args.N}")

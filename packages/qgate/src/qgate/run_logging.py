@@ -4,7 +4,7 @@ run_logging.py — Structured run logging (JSON / CSV / Parquet).
 Every :class:`~qgate.filter.TrajectoryFilter` run can be logged to
 disk for reproducibility and analysis.
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 
 from __future__ import annotations

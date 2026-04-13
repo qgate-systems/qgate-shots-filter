@@ -15,7 +15,7 @@ The same counts are then post-processed with every conditioning variant.
 Batch-level abort: a short W=1 probe is run first.  If the probe pass-rate
 < θ_batch (0.65), the full circuit is skipped and marked as aborted.
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 from __future__ import annotations
 

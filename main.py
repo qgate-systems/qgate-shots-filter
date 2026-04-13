@@ -1,5 +1,5 @@
 def main():
-    print("Hello from qgate-trajectory-filter!")
+    print("Hello from qgate-shots-filter!")
 
 
 if __name__ == "__main__":

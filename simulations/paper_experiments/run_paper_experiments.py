@@ -31,7 +31,7 @@ Usage:
     python run_paper_experiments.py --experiment cross-algo   # Exp 3 only (~50 min)
     python run_paper_experiments.py --experiment all --dry-run # quick validation (~3 min)
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 from __future__ import annotations
 

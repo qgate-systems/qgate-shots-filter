@@ -9,14 +9,14 @@ By submitting a pull request you agree that your contribution will be licensed
 under the same terms. Please read the [LICENSE](LICENSE) before contributing.
 
 The Software implements methods covered by **pending patent applications**
-(US 63/983,831, US 63/989,632, IL 326915). Contributions that extend the
+(patent pending). Contributions that extend the
 patented methods may need additional IP review.
 
 ## Development Setup
 
 ```bash
-git clone https://github.com/ranbuch/qgate-trajectory-filter.git
-cd qgate-trajectory-filter
+git clone https://github.com/qgate-systems/qgate-shots-filter.git
+cd qgate-shots-filter
 python -m venv .venv && source .venv/bin/activate
 pip install -e "packages/qgate[dev]"
 ```

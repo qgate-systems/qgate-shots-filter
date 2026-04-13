@@ -15,7 +15,7 @@ Provides two adaptive threshold classes:
 Both classes share the same :class:`~qgate.config.DynamicThresholdConfig`
 and are wired into :class:`~qgate.filter.TrajectoryFilter` transparently.
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 
 from __future__ import annotations

@@ -23,7 +23,7 @@ faq:
 
 # Statistical Validation: Bias Study & Benchmarks
 
-> **Patent notice:** US Patent App. Nos. 63/983,831 & 63/989,632 | Israeli Patent App. No. 326915
+> **Patent notice:** The underlying methods are covered by pending patent applications.
 
 ## Overview
 
@@ -292,8 +292,8 @@ boundary is dictated by the physics of the system, not by random chance.
 
 ```bash
 # Clone the repository
-git clone https://github.com/ranbuch/qgate-trajectory-filter.git
-cd qgate-trajectory-filter
+git clone https://github.com/qgate-systems/qgate-shots-filter.git
+cd qgate-shots-filter
 pip install -e "packages/qgate[all]"
 
 # Run experiments 1–3 (dry run — 2 trials, 1K shots, ~2 minutes)
@@ -317,10 +317,10 @@ PYTHONUNBUFFERED=1 python simulations/paper_experiments/run_train_test_validatio
 Full result JSONs with per-trial values, confidence intervals, and all
 statistical metrics are available in the repository:
 
-- [`results/noise_sweep_8q_15t_20260304_221252.json`](https://github.com/ranbuch/qgate-trajectory-filter/blob/main/results/noise_sweep_8q_15t_20260304_221252.json) — Experiment 1 (Noise Sweep)
-- [`results/qubit_scaling_15t_20260306_171948.json`](https://github.com/ranbuch/qgate-trajectory-filter/blob/main/results/qubit_scaling_15t_20260306_171948.json) — Experiment 2 (Qubit Scaling)
-- [`results/cross_algo_8q_15t_20260306_174443.json`](https://github.com/ranbuch/qgate-trajectory-filter/blob/main/results/cross_algo_8q_15t_20260306_174443.json) — Experiment 3 (Cross-Algorithm)
-- [`results/train_test_8q_15t_20260306_213413.json`](https://github.com/ranbuch/qgate-trajectory-filter/blob/main/results/train_test_8q_15t_20260306_213413.json) — Experiment 4 (Train/Test Split)
+- [`results/noise_sweep_8q_15t_20260304_221252.json`](https://github.com/qgate-systems/qgate-shots-filter/blob/main/results/noise_sweep_8q_15t_20260304_221252.json) — Experiment 1 (Noise Sweep)
+- [`results/qubit_scaling_15t_20260306_171948.json`](https://github.com/qgate-systems/qgate-shots-filter/blob/main/results/qubit_scaling_15t_20260306_171948.json) — Experiment 2 (Qubit Scaling)
+- [`results/cross_algo_8q_15t_20260306_174443.json`](https://github.com/qgate-systems/qgate-shots-filter/blob/main/results/cross_algo_8q_15t_20260306_174443.json) — Experiment 3 (Cross-Algorithm)
+- [`results/train_test_8q_15t_20260306_213413.json`](https://github.com/qgate-systems/qgate-shots-filter/blob/main/results/train_test_8q_15t_20260306_213413.json) — Experiment 4 (Train/Test Split)
 
 ---
 

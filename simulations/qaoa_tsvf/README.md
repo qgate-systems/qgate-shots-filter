@@ -1,6 +1,6 @@
 # QAOA vs TSVF-QAOA MaxCut (IBM Torino)
 
-> **Patent notice:** US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+> **Patent notice:** The underlying methods are covered by pending patent applications.
 
 ## Objective
 

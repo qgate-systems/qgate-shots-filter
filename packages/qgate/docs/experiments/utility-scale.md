@@ -15,7 +15,7 @@ faq:
 
 # Utility-Scale Stress Test: 133-Qubit TFIM on IBM Torino
 
-> **Patent notice:** US Patent App. Nos. 63/983,831 & 63/989,632 | Israeli Patent App. No. 326915
+> **Patent notice:** The underlying methods are covered by pending patent applications.
 
 ## "Works Clean, Scales Dirty"
 

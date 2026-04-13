@@ -37,7 +37,7 @@ Usage:
     # Specify backend explicitly:
     python run_tfim_dryrun.py --mode ibm --backend ibm_brisbane
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 from __future__ import annotations
 

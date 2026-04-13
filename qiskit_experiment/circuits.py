@@ -12,7 +12,7 @@ Builds parameterised circuits with:
 All mid-circuit measurement results are stored in classical registers so
 that the Conditioning engine can post-process them.
 
-Patent reference: US App. Nos. 63/983,831 & 63/989,632 | IL App. No. 326915
+Patent pending (see LICENSE)
 """
 from __future__ import annotations
 
