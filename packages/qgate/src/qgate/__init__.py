@@ -80,6 +80,9 @@ from qgate.threshold import (
     estimate_diffusion_width,
 )
 
+# ── Qgate Advantage cloud client ──────────────────────────────────────────
+from qgate.cloud import QgateAdvantageClient, QgateAPIError, QgateTaskError, QgateTimeoutError
+
 __all__ = [
     "AdapterKind",
     # Primary API
@@ -105,6 +108,11 @@ __all__ = [
     "QPETSVFAdapter",
     # QgateSampler OS
     "QgateSampler",
+    # Qgate Advantage cloud client
+    "QgateAdvantageClient",
+    "QgateAPIError",
+    "QgateTaskError",
+    "QgateTimeoutError",
     "RunLogger",
     "SamplerConfig",
     "ThresholdMode",

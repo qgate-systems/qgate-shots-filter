@@ -128,6 +128,8 @@ nav:
     - PennyLane: adapters/pennylane.md
   - Middleware:
     - QgateSampler: middleware/qgate-sampler.md
+  - Cloud API:
+    - Advantage Client: cloud/advantage-client.md
   - CLI Reference: cli.md
   - API Reference: api.md
   - Contributing: contributing.md

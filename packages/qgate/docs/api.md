@@ -1,8 +1,8 @@
 ---
 description: >-
   qgate Python API reference. Auto-generated documentation for GateConfig, TrajectoryFilter,
-  scoring, thresholding, run logging, and all framework and algorithm adapters.
-keywords: qgate API, Python API reference, GateConfig, TrajectoryFilter, scoring API, threshold API, adapter API, mkdocstrings
+  QgateAdvantageClient, scoring, thresholding, run logging, and all framework and algorithm adapters.
+keywords: qgate API, Python API reference, GateConfig, TrajectoryFilter, QgateAdvantageClient, scoring API, threshold API, adapter API, mkdocstrings
 ---
 
 # API Reference
@@ -14,6 +14,10 @@ keywords: qgate API, Python API reference, GateConfig, TrajectoryFilter, scoring
 ::: qgate.scoring
 ::: qgate.threshold
 ::: qgate.run_logging
+
+## Cloud API Client
+
+::: qgate.cloud
 
 ## Framework Adapters
 

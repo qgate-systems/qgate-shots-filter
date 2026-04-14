@@ -17,6 +17,7 @@ The underlying invention is patent pending.
 
 ```bash
 pip install qgate                # core (numpy, pydantic, typer)
+pip install qgate[quant]         # + numpy + pandas for vectorised cloud API inputs
 pip install qgate[csv]           # + pandas for CSV logging
 pip install qgate[parquet]       # + pandas + pyarrow for Parquet logging
 pip install qgate[qiskit]        # + IBM Qiskit adapter
@@ -241,6 +242,76 @@ with RunLogger("results.jsonl") as logger:
 
 Each logged record includes a deterministic **run ID** (SHA-256 prefix),
 full config JSON, acceptance probability, TTS, and a UTC timestamp.
+
+---
+
+## Qgate Advantage Cloud API
+
+`QgateAdvantageClient` provides a synchronous Python SDK over the **Qgate Advantage PPU REST API** — a cloud service that accelerates stochastic Monte Carlo pricing using trajectory-filtered hardware.
+
+```bash
+pip install qgate[quant]   # numpy + pandas required for vectorised inputs
+```
+
+### Asian Option (Fractional BM)
+
+```python
+from qgate.cloud import QgateAdvantageClient
+
+client = QgateAdvantageClient(api_key="your-key")
+
+# Scalar strike → dict
+result = client.price_asian_fbm(
+    spot=100.0, strike=105.0, vol=0.20, hurst=0.70,
+    paths=100_000, steps=252,
+)
+print(result["price"], result["delta"])
+
+# Strike strip → pandas.DataFrame
+import numpy as np
+df = client.price_asian_fbm(
+    spot=100.0, strike=np.linspace(90, 110, 9),
+    vol=0.20, hurst=0.70, paths=100_000, steps=252,
+)
+print(df[["strike_price", "price", "delta"]])
+```
+
+### European Option (Heston SV)
+
+```python
+result = client.price_european_heston(
+    spot=100.0, strike=105.0,
+    time_to_maturity=0.5,   # 6 months
+    initial_vol=0.04,        # V₀ = σ₀²
+    mean_reversion=2.0,      # κ
+    long_term_var=0.04,      # θ
+    vol_of_vol=0.3,          # ξ
+    correlation=-0.7,        # ρ (leverage effect)
+    paths=100_000, steps=100,
+)
+print(result["price"])
+```
+
+### Basket Option (Correlated fBM)
+
+```python
+import numpy as np
+
+corr = np.array([[1.0, 0.5, 0.3], [0.5, 1.0, 0.4], [0.3, 0.4, 1.0]])
+
+result = client.price_basket_fbm(
+    spots=[100.0, 95.0, 105.0],
+    strike=100.0,
+    volatilities=[0.20, 0.25, 0.18],
+    correlation_matrix=corr,
+    hurst_parameters=[0.70, 0.60, 0.50],
+    weights=[0.40, 0.30, 0.30],
+    paths=100_000, steps=252,
+)
+print(result["price"])
+```
+
+Full documentation: [Qgate Advantage Cloud Client](https://qgate-systems.github.io/qgate-shots-filter/cloud/advantage-client/)
 
 ---
 
