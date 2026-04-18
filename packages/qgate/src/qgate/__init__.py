@@ -83,14 +83,36 @@ from qgate.threshold import (
 # ── Qgate Advantage cloud client ──────────────────────────────────────────
 from qgate.cloud import QgateAdvantageClient, QgateAPIError, QgateTaskError, QgateTimeoutError
 
+# ── Qgate Execute pipeline (circuit → API → Result) ──────────────────────
+from qgate.client import (
+    AsyncQgateClient,
+    ClientConfig,
+    QgateBackendError,
+    QgateClientError,
+    reconstruct_result,
+)
+from qgate.execute import ExecutionContext, execute
+from qgate.transpiler import (
+    circuit_to_dag,
+    dag_to_circuit,
+    deserialise_payload,
+    inject_telemetry,
+    serialise_payload,
+    strip_telemetry_registers,
+)
+
 __all__ = [
     "AdapterKind",
+    # Execute pipeline
+    "AsyncQgateClient",
     # Primary API
     "BaseAdapter",
+    "ClientConfig",
     # Legacy (backward compat)
     "ConditioningStats",
     "ConditioningVariant",
     "DynamicThresholdConfig",
+    "ExecutionContext",
     "FilterResult",
     "FusionConfig",
     # Galton adaptive threshold
@@ -111,6 +133,8 @@ __all__ = [
     # Qgate Advantage cloud client
     "QgateAdvantageClient",
     "QgateAPIError",
+    "QgateBackendError",
+    "QgateClientError",
     "QgateTaskError",
     "QgateTimeoutError",
     "RunLogger",
@@ -120,16 +144,27 @@ __all__ = [
     # VQE/TSVF adapter
     "VQETSVFAdapter",
     "apply_rule_to_batch",
+    # Transpiler functions
+    "circuit_to_dag",
     "compute_run_id",
     "compute_window_metric",
+    "dag_to_circuit",
     "decide_global",
     "decide_hierarchical",
     "decide_score_fusion",
+    "deserialise_payload",
     "estimate_diffusion_width",
+    # Execute context manager
+    "execute",
     "fuse_scores",
+    "inject_telemetry",
     "list_adapters",
     "load_adapter",
+    # Client functions
+    "reconstruct_result",
     "score_batch",
     "score_fusion",
     "score_outcome",
+    "serialise_payload",
+    "strip_telemetry_registers",
 ]
